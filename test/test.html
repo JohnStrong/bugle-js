@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Bugle (publish/subscribe) examples</title>
+</head>
+<body>
+	<script src="./../bugle.js"></script>
+	<script>
+
+		'use strict';
+
+		var newPub = Bugle(),
+
+		myObj1 = {
+			'state': [1,2,3,4],
+			'update': function(topic, data) {
+
+				// concat some data
+				this.state = this.state.concat(data);
+
+				// result =>
+				// topic -> 'joins'
+				// data -> [5,6,7,8]
+				// state -> [1,2,3,4,5,6,7,8]
+				console.log(topic, data, this.state);
+				
+			}
+		},
+
+
+		myObj2 = {
+			'state': [5,4,3,2,1],
+			'execute': function(topic, data) {
+
+				// push data into state index (nested array)
+				this.state.push(data);
+
+				console.log(topic, data, this.state);
+			}
+		};
+
+		// subscribe myObj to 'joins' topic
+		// use the update property function when data is published to the topic
+		var oid1 = newPub.subscribe('joins', myObj1, 'update'),
+		oid2 = newPub.subscribe('joins', myObj2, 'execute');
+
+		// publish array to joins topic
+		newPub.publish('joins', [5,6,7,8]);
+
+		// see the state of our publish/subscribe object
+		console.log(oid1, oid2);
+
+
+		// empty obj where oId := oid1
+		newPub.unsubscribe('joins', oid1);
+		console.log(newPub);
+
+		// empty obj where oId := oid2
+		newPub.unsubscribe('joins', oid2)
+		console.log(newPub);
+
+	</script>
+</body>
+</html>
