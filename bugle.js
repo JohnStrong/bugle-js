@@ -4,9 +4,7 @@ window.Bugle = ( function() {
 
 	// correct type checking
 	const _is = function(obj, type) {
-		
-		var name = Object.prototype.toString.call(obj).slice(8, -1);
-		return name === type;
+		return Object.prototype.toString.call(obj).slice(8, -1) === type;
 	},
 
 	// ensures the we get 'true' sync behaviour 
