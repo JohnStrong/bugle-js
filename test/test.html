@@ -12,6 +12,10 @@
 
 		var newPub = Bugle(),
 
+		async = function(fn) {
+			setTimeout(fn, 50);
+		},
+
 		myObj1 = {
 			'state': [1,2,3,4],
 			'update': function(topic, data) {
@@ -45,20 +49,32 @@
 		var oid1 = newPub.subscribe('joins', myObj1, 'update'),
 		oid2 = newPub.subscribe('joins', myObj2, 'execute');
 
-		// publish array to joins topic
-		newPub.publish('joins', [5,6,7,8]);
-
 		// see the state of our publish/subscribe object
+		console.log('subscribing...');
 		console.log(oid1, oid2);
 
 
-		// empty obj where oId := oid1
-		newPub.unsubscribe('joins', oid1);
-		console.log(newPub);
+		// publish array to joins topic
+		console.log('publishing...')
+		newPub.publish('joins', [5,6,7,8]);
 
-		// empty obj where oId := oid2
-		newPub.unsubscribe('joins', oid2)
-		console.log(newPub);
+
+		// test async of Bugle
+		async(function() {
+			console.log('inspecting state');
+			console.log(myObj1.state);
+		});
+
+		async(function() {
+
+			// empty obj where oId := oid1
+			var res1 = newPub.unsubscribe('joins', oid1),
+			// empty obj where oId := oid2
+			res2 = newPub.unsubscribe('joins', oid2);
+
+			console.log('unsubscribing...');
+			console.log(res1, res2);
+		});
 
 	</script>
 </body>

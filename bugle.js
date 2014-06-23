@@ -2,10 +2,16 @@ window.Bugle = ( function() {
 	
 	'use strict';
 
+	// correct type checking
 	const _is = function(obj, type) {
 		
 		var name = Object.prototype.toString.call(obj).slice(8, -1);
 		return name === type;
+	},
+
+	// ensures the we get 'true' sync behaviour 
+	async = function(fn) {
+		setTimeout(fn, 0);
 	},
 
 	_throwable = function(name, message) {
@@ -30,20 +36,39 @@ window.Bugle = ( function() {
 	// notify all objects subscribed to the given topic with the data received
 	Bugle.prototype.publish = function(topic, data) {
 		
-		var isTopicString = _is(topic, 'String');
+		var isTopicString = _is(topic, 'String'),
 
-		if(isTopicString) {
+		exception = function(e) {
+			throw _throwable('FailedToPublishError', 
+				'Failed to publish to instance on topic '.concat(topic));
+		},
+
+		emit = () => {
 			
 			if(this.topics[topic]) {
 
-				this.topics[topic].forEach(function(obj, index) {
-					obj['fn'].apply(obj['instance'], [topic, data, index]);
-				});
-			}
+				var topicLine = this.topics[topic];
 
+				for(var index in topicLine) {
+
+					var obj = topicLine[index];
+					
+					try {
+						obj.fn.apply(obj.instance, [topic, data, index]);
+					} catch(e) {
+						async(function() { exception(e); });
+					}
+				}
+			}
+		};
+
+		if(isTopicString) {
+			async(function() { emit(); });
 		} else {
 			throw _throwable('invalidTopicType', 'in method publish, topic[args#1] must be a String');
 		}
+
+		return true;
 	};
 
 	// subscribe an object to a topic using a given toCall function to execute on publish
@@ -74,21 +99,33 @@ window.Bugle = ( function() {
 
 	// remove an object from the subscriptions list on a topic with its assigned oId
 	Bugle.prototype.unsubscribe = function(topic, oId) {
-		var isTopicString = _is(topic, 'String');
+		
+		var isTopicString = _is(topic, 'String'),
 
-		if(isTopicString) {
+		unsub = () => {
 
 			if(this.topics[topic]) {
 				
-				var topic = this.topics[topic];
+				var topicLine = this.topics[topic];
 
-				topic.forEach(function(obj, index) {
-					if(obj.oId === oId) { 
-						var spliced = topic.splice(index, 1);
-					}
-				});
+				for(var index in topicLine) {
+
+					var subscriber = topicLine[index];
+
+					if(subscriber.oId === oId) {
+						topicLine.splice(index, 1);
+					};
+				}
 			}
+		};
+
+		if(isTopicString) {
+			async(function() { unsub(); });
+		} else {
+			throw _throwable('invalidTopicType',  'in method subscribe, topic[args#1] must be a String');
 		}
+
+		return true;
 	};
 
 	// user does not have to specify that silly 'new' keyword
