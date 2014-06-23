@@ -14,15 +14,24 @@ window.Bugle = ( function() {
 		setTimeout(fn, 0);
 	},
 
-	_throwable = function(name, message) {
-		
-		var  throwable = {};
+	// convenience object for throwing helpful errors
+	_throwable = (function() {
 
-		throwable['name'] = name;
-		throwable['message'] = message;
+		var throwError = (message) => {
+			throw new Error(message);
+		};
 
-		return new Error(''.concat(name).concat(' => ').concat(message));
-	};
+		return {
+			'failedToPublish': function(topic) {
+				throwError('Failed to publish to instance on topic ' + topic);
+			},
+
+			'InvalidTopicType': function() {
+				throwError('topic identifier must be of type String');
+			}
+		};
+
+	})();
 
 
 	// init function
@@ -38,25 +47,24 @@ window.Bugle = ( function() {
 		
 		var isTopicString = _is(topic, 'String'),
 
-		exception = function(e) {
-			throw _throwable('FailedToPublishError', 
-				'Failed to publish to instance on topic '.concat(topic));
-		},
-
 		emit = () => {
 			
 			if(this.topics[topic]) {
 
 				var topicLine = this.topics[topic];
 
+				// execute each topic in topic line in order
 				for(var index in topicLine) {
 
 					var obj = topicLine[index];
-					
+
 					try {
 						obj.fn.apply(obj.instance, [topic, data, index]);
 					} catch(e) {
-						async(function() { exception(e); });
+
+						async(function() { 
+							_throwable.failedToPublish(topic); 
+						});
 					}
 				}
 			}
@@ -65,7 +73,7 @@ window.Bugle = ( function() {
 		if(isTopicString) {
 			async(function() { emit(); });
 		} else {
-			throw _throwable('invalidTopicType', 'in method publish, topic[args#1] must be a String');
+			_throwable.InvalidTopicType();
 		}
 
 		return true;
@@ -92,7 +100,7 @@ window.Bugle = ( function() {
 			return this.oId;
 
 		} else {
-			throw _throwable('invalidTopicType',  'in method subscribe, topic[args#1] must be a String');
+			_throwable.InvalidTopicType();
 		}
 	};
 
@@ -122,7 +130,7 @@ window.Bugle = ( function() {
 		if(isTopicString) {
 			async(function() { unsub(); });
 		} else {
-			throw _throwable('invalidTopicType',  'in method subscribe, topic[args#1] must be a String');
+			_throwable.InvalidTopicType();
 		}
 
 		return true;
