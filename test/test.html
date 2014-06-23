@@ -7,16 +7,17 @@
 <body>
 	<script src="./../bugle.js"></script>
 	<script>
+		// will add more comprehensive examples and tests to the project at a later date
 
 		'use strict';
 
-		var newPub = Bugle(),
+		var bugle = Bugle(),
 
 		async = function(fn) {
 			setTimeout(fn, 50);
 		},
 
-		myObj1 = {
+		literalObj = {
 			'state': [1,2,3,4],
 			'update': function(topic, data) {
 
@@ -32,22 +33,31 @@
 			}
 		},
 
+		instanceObj = Instance();
 
-		myObj2 = {
-			'state': [5,4,3,2,1],
-			'execute': function(topic, data) {
+		// constructor functions should work just like object literals
+		function Instance() {
 
-				// push data into state index (nested array)
-				this.state.push(data);
+			if(this instanceof Instance) {
+				
+				this.state = [5,4,3,2,1];
+			
+				this.execute = function(topic, data) {
 
-				console.log(topic, data, this.state);
+					this.state.push(data);
+					console.log(topic, data, this.state);
+				}
+
+			} else {
+
+				return new Instance();
 			}
-		};
+		}
 
 		// subscribe myObj to 'joins' topic
 		// use the update property function when data is published to the topic
-		var oid1 = newPub.subscribe('joins', myObj1, 'update'),
-		oid2 = newPub.subscribe('joins', myObj2, 'execute');
+		var oid1 = bugle.subscribe('joins', literalObj, 'update'),
+		oid2 = bugle.subscribe('joins', instanceObj, 'execute');
 
 		// see the state of our publish/subscribe object
 		console.log('subscribing...');
@@ -55,24 +65,26 @@
 
 
 		// publish array to joins topic
-		console.log('publishing...')
-		newPub.publish('joins', [5,6,7,8]);
+		console.log('\npublishing...')
+		bugle.publish('joins', [5,6,7,8]);
 
 
 		// test async of Bugle
 		async(function() {
-			console.log('inspecting state');
-			console.log(myObj1.state);
+			console.log('\ninspecting state');
+			console.log(literalObj.state);
+			console.log(instanceObj.state);
 		});
 
 		async(function() {
 
 			// empty obj where oId := oid1
-			var res1 = newPub.unsubscribe('joins', oid1),
+			var res1 = bugle.unsubscribe('joins', oid1),
+			
 			// empty obj where oId := oid2
-			res2 = newPub.unsubscribe('joins', oid2);
+			res2 = bugle.unsubscribe('joins', oid2);
 
-			console.log('unsubscribing...');
+			console.log('\nunsubscribing... should be undefined');
 			console.log(res1, res2);
 		});
 
