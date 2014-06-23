@@ -11,48 +11,83 @@
 
 		'use strict';
 
-		var bugle = Bugle(),
-
-		async = function(fn) {
-			setTimeout(fn, 50);
+		const async = function(fn) {
+			setTimeout(fn, 0);
 		},
 
-		literalObj = {
-			'state': [1,2,3,4],
-			'update': function(topic, data) {
+		// loop continuously until a condition is met
+		when = function(condition, then) {
 
-				// concat some data
-				this.state = this.state.concat(data);
+			async(function loop() {
 
-				// result =>
-				// topic -> 'joins'
-				// data -> [5,6,7,8]
-				// state -> [1,2,3,4,5,6,7,8]
-				console.log(topic, data, this.state);
-				
-			}
-		},
-
-		instanceObj = Instance();
-
-		// constructor functions should work just like object literals
-		function Instance() {
-
-			if(this instanceof Instance) {
-				
-				this.state = [5,4,3,2,1];
-			
-				this.execute = function(topic, data) {
-
-					this.state.push(data);
-					console.log(topic, data, this.state);
+				if(condition()) {
+					then();
+				} else {
+					async(loop);
 				}
+			});
+		},
 
-			} else {
+		// test instances
+		test = {
+			'literal': {
+				'state': [1,2,3,4],
+				'update': function(topic, data) {
+					this.state = this.state.concat(data);
+				}
+			},
 
-				return new Instance();
+			'instance': function Instance() {
+
+				if(this instanceof Instance) {
+					
+					this.state = [5,4,3,2,1];
+				
+					this.execute = function(topic, data) {
+						this.state.push(data);
+					}
+
+				} else {
+
+					return new Instance();
+				}
 			}
-		}
+		},
+
+		// create our test instances
+
+		literalObj = test.literal,
+		instanceObj = test.instance(),
+
+		// create new Bugle object
+		bugle = Bugle();
+
+		// test suite(s)
+
+		when(
+			function() { 
+				return literalObj.state.length === 8 && 
+					instanceObj.state.length === 6; 
+			},
+			function() {
+				console.log('state change - literal object');
+				console.log(literalObj.state);
+
+				console.log('state change - instance object');
+				console.log(instanceObj.state);
+			}
+		);
+
+		when(
+			function() {
+				return bugle.topics['joins'].indexOf(oid1) == -1 && 
+					bugle.topics['joins'].indexOf(oid2) == -1;
+			},
+			function() {
+				console.log('oid(s): ' + oid1 + ' & ' + oid2 + ' unsubscribed from joins topic');
+			}
+		);
+
 
 		// subscribe myObj to 'joins' topic
 		// use the update property function when data is published to the topic
@@ -60,33 +95,16 @@
 		oid2 = bugle.subscribe('joins', instanceObj, 'execute');
 
 		// see the state of our publish/subscribe object
-		console.log('subscribing...');
-		console.log(oid1, oid2);
+		console.log('subscribing to topic...');
 
 
 		// publish array to joins topic
-		console.log('\npublishing...')
+		console.log('publishing to topic...')
 		bugle.publish('joins', [5,6,7,8]);
 
-
-		// test async of Bugle
-		async(function() {
-			console.log('\ninspecting state');
-			console.log(literalObj.state);
-			console.log(instanceObj.state);
-		});
-
-		async(function() {
-
-			// empty obj where oId := oid1
-			var res1 = bugle.unsubscribe('joins', oid1),
-			
-			// empty obj where oId := oid2
-			res2 = bugle.unsubscribe('joins', oid2);
-
-			console.log('\nunsubscribing... should be undefined');
-			console.log(res1, res2);
-		});
+		console.log('unsubscribing from topic...');
+		bugle.unsubscribe('joins', oid1);
+		bugle.unsubscribe('joins', oid2);
 
 	</script>
 </body>

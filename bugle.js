@@ -66,7 +66,7 @@ window.Bugle = ( function() {
 	Bugle.prototype.publish = function(topic, data) {
 
 		var emit = () => {
-		
+
 			if(this.topics[topic]) {
 
 				var topicLine = this.topics[topic];
@@ -74,10 +74,11 @@ window.Bugle = ( function() {
 				// execute each topic in topic line in order
 				for(var index in topicLine) {
 
-					var obj = topicLine[index];
+					var obj = topicLine[index],
+					args = [topic, data, index];
 
 					try {
-						obj.fn.apply(obj.instance, [topic, data, index]);
+						obj.fn.apply(obj.instance, args);
 					} catch(e) {
 
 						_async(function() { 
@@ -107,7 +108,9 @@ window.Bugle = ( function() {
 		
 		// verify that param #1 & #3 are of type String
 		var areString = _verify.areAll([topic, toCall], 'String'),
-			isinstance = _verify.is(instance, 'Object');
+
+		// verify instance is an Object
+		isinstance = _verify.is(instance, 'Object');
 
 		if(areString) {
 		
