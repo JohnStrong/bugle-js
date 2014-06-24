@@ -12,9 +12,6 @@ window.Bugle = ( function() {
 		// apply type checking to a collection
 		'areAll': function(items, type) {
 		
-			var status = true,
-				self = this;
-
 			for(var item in items) {
 
 				if(!this.is(items[item], type)) {
