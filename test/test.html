@@ -33,7 +33,7 @@
 			
 			'literal': {
 				'state': [1,2,3,4],
-				'update': function(data, topic, index) {
+				'update': function(data, topic) {
 					this.state = this.state.concat(data);
 				}
 			},
@@ -44,8 +44,10 @@
 					
 					this.state = [5,4,3,2,1];
 				
-					this.execute = function(data, topic, index) {
-						this.state.push(data);
+					this.execute = function(data1, data2) {
+
+						this.state.push(data1);
+						this.state.push(data2);
 					}
 
 				} else {
@@ -67,7 +69,7 @@
 		when(
 			function() { 
 				return literalObj.state.length === 8 && 
-					instanceObj.state.length === 6; 
+					instanceObj.state.length === 7; 
 			},
 			function() {
 				console.log('state change - literal object');
@@ -100,7 +102,7 @@
 
 		// pub array to joins topic
 		console.log('publishing to topic...')
-		bugle1.pub('joins', [5,6,7,8]);
+		bugle1.pub('joins', [5,6,7,8], [1,2]);
 
 		console.log('unsubscribing from topic...');
 		bugle1.unsub('joins', oid1);

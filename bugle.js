@@ -39,8 +39,8 @@ window.Bugle = ( function() {
 		},
 
 		invalids = {
-			'sub': 'USAGE [topic:String, object:Object, toCall:String]',
-			'pub': 'UASGE [topic:String, data:Any]',
+			'sub': 'USAGE [ topic:String, object:Object, toCall:String ]',
+			'pub': 'UASGE [ topic:String, data:Array[Any...] ]',
 			'unsub': 'USAGE [topic:String, oId:Number]'
 		}
 
@@ -58,7 +58,6 @@ window.Bugle = ( function() {
 
 	})();
 
-	// Bugle function constructor
 	function Bugle() {
 
 		// holds each topic along with its subscribers
@@ -71,13 +70,15 @@ window.Bugle = ( function() {
 	Bugle.prototype = {
 		
 	// notify all objects subscribed to the given topic with the data received
-	pub: function(topic, data) {
+	pub: function(topic) {
+
+		var args = Array.prototype.slice.call(arguments, 1),
 
 		// apply current sub object and pub args to sub function
-		var publishTo = (subscriber, index) => {
+		publishTo = (subscriber) => {
 					
 			try {
-				subscriber.fn.call(subscriber.instance, data, topic, index);
+				subscriber.fn.apply(subscriber.instance, args.concat(topic));
 			} catch(e) {
 
 				_async(function() { 
