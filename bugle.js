@@ -70,6 +70,22 @@ window.Bugle = ( function() {
 
 			var args = [data, topic],
 
+			// apply current sub object and pub args to sub function
+			publishTo = function(subscriber, index) {
+						
+				args.push(index);
+
+				try {
+					subscriber.fn.apply(subscriber.instance, args);
+				} catch(e) {
+
+					_async(function() { 
+						_throwable.failedToPublish(topic, e); 
+					});
+				}
+
+			},
+
 			emit = () => {
 
 				if(this.topics[topic]) {
@@ -77,23 +93,7 @@ window.Bugle = ( function() {
 					var topicLine = this.topics[topic];
 
 					// execute each topic in topic line in order
-					topicLine.forEach(function(subscriber, index) {
-						
-						args.push(index);
-
-						try {
-
-							// apply current sub object and pub args to sub function
-							subscriber.fn.apply(subscriber.instance, args);
-
-						} catch(e) {
-
-							_async(function() { 
-								_throwable.failedToPublish(topic, e); 
-							});
-						}
-
-					});
+					topicLine.forEach(publishTo);
 				}
 			},
 
