@@ -9,6 +9,7 @@ window.Bugle = ( function() {
 			return Object.prototype.toString.call(obj).slice(8, -1) === type;
 		},
 
+		// apply type checking to a collection
 		'areAll': function(items, type) {
 		
 			var status = true,
@@ -89,10 +90,8 @@ window.Bugle = ( function() {
 		emit = () => {
 
 			if(this.topics[topic]) {
-
+				
 				var topicLine = this.topics[topic];
-
-				// execute each topic in topic line in order
 				topicLine.forEach(publishTo);
 			}
 		},
