@@ -68,27 +68,32 @@ window.Bugle = ( function() {
 		// notify all objects subscribed to the given topic with the data received
 		pub: function(topic, data) {
 
-			var emit = () => {
+			var args = [data, topic],
+
+			emit = () => {
 
 				if(this.topics[topic]) {
 
 					var topicLine = this.topics[topic];
 
 					// execute each topic in topic line in order
-					for(var index in topicLine) {
-
-						var obj = topicLine[index],
-						args = [data, topic, index];
+					topicLine.forEach(function(subscriber, index) {
+						
+						args.push(index);
 
 						try {
-							obj.fn.apply(obj.instance, args);
+
+							// apply current sub object and pub args to sub function
+							subscriber.fn.apply(subscriber.instance, args);
+
 						} catch(e) {
 
 							_async(function() { 
 								_throwable.failedToPublish(topic, e); 
 							});
 						}
-					}
+
+					});
 				}
 			},
 
@@ -152,12 +157,12 @@ window.Bugle = ( function() {
 					
 					var topicLine = this.topics[topic];
 
+					// loop for specified oId until we get a match
 					for(var index in topicLine) {
 
-						var subscriber = topicLine[index];
-
-						if(subscriber.oId === oId) {
+						if(topicLine[index].oId === oId) {
 							topicLine.splice(index, 1);
+							return;
 						};
 					}
 				}
