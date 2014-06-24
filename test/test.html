@@ -6,7 +6,7 @@
 </head>
 <body>
 	<script src="./../bugle.js"></script>
-	<script>
+	<script type="text/javascript">
 		// will add more comprehensive examples and tests to the project at a later date
 
 		'use strict';
@@ -60,10 +60,9 @@
 		instanceObj = test.instance(),
 
 		// create new Bugle object
-		bugle = Bugle();
+		bugle1 = Bugle();
 
 		// test suite(s)
-
 		when(
 			function() { 
 				return literalObj.state.length === 8 && 
@@ -80,8 +79,8 @@
 
 		when(
 			function() {
-				return bugle.topics['joins'].indexOf(oid1) == -1 && 
-					bugle.topics['joins'].indexOf(oid2) == -1;
+				return bugle1.topics['joins'].indexOf(oid1) == -1 && 
+					bugle1.topics['joins'].indexOf(oid2) == -1;
 			},
 			function() {
 				console.log('oid(s): ' + oid1 + ' & ' + oid2 + ' unsubscribed from joins topic');
@@ -91,8 +90,8 @@
 
 		// subscribe myObj to 'joins' topic
 		// use the update property function when data is published to the topic
-		var oid1 = bugle.subscribe('joins', literalObj, 'update'),
-		oid2 = bugle.subscribe('joins', instanceObj, 'execute');
+		var oid1 = bugle1.subscribe('joins', literalObj, 'update'),
+		oid2 = bugle1.subscribe('joins', instanceObj, 'execute');
 
 		// see the state of our publish/subscribe object
 		console.log('subscribing to topic...');
@@ -100,11 +99,11 @@
 
 		// publish array to joins topic
 		console.log('publishing to topic...')
-		bugle.publish('joins', [5,6,7,8]);
+		bugle1.publish('joins', [5,6,7,8]);
 
 		console.log('unsubscribing from topic...');
-		bugle.unsubscribe('joins', oid1);
-		bugle.unsubscribe('joins', oid2);
+		bugle1.unsubscribe('joins', oid1);
+		bugle1.unsubscribe('joins', oid2);
 
 	</script>
 </body>

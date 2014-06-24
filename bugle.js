@@ -51,9 +51,9 @@ window.Bugle = ( function() {
 
 	})();
 
-	
+	// Bugle function constructor
 	function Bugle() {
-		
+
 		// holds each topic along with its subscribers
 		this.topics = [];
 
@@ -61,118 +61,120 @@ window.Bugle = ( function() {
 		this.oId = 0;
 	}
 
-	// publish some data to a topic
-	// notify all objects subscribed to the given topic with the data received
-	Bugle.prototype.publish = function(topic, data) {
+	Bugle.prototype = {
+		
+		// publish some data to a topic
+		// notify all objects subscribed to the given topic with the data received
+		publish: function(topic, data) {
 
-		var emit = () => {
+			var emit = () => {
 
-			if(this.topics[topic]) {
+				if(this.topics[topic]) {
 
-				var topicLine = this.topics[topic];
+					var topicLine = this.topics[topic];
 
-				// execute each topic in topic line in order
-				for(var index in topicLine) {
+					// execute each topic in topic line in order
+					for(var index in topicLine) {
 
-					var obj = topicLine[index],
-					args = [topic, data, index];
+						var obj = topicLine[index],
+						args = [topic, data, index];
 
-					try {
-						obj.fn.apply(obj.instance, args);
-					} catch(e) {
+						try {
+							obj.fn.apply(obj.instance, args);
+						} catch(e) {
 
-						_async(function() { 
-							_throwable.failedToPublish(topic); 
-						});
+							_async(function() { 
+								_throwable.failedToPublish(topic); 
+							});
+						}
 					}
 				}
+			},
+
+			isTopicString = _verify.is(topic, 'String');
+			
+			if(isTopicString) {
+
+				_async(function() { emit(); });
+
+			} else {
+
+				_throwable.InvalidTopicType();
+			}
+
+			return true;
+		},
+
+		// subscribe an instance to a topic using a given toCall function to execute on publish
+		subscribe: function(topic, instance, toCall) {
+			
+			// verify that param #1 & #3 are of type String
+			var areString = _verify.areAll([topic, toCall], 'String'),
+
+			// verify instance is an Object
+			isinstance = _verify.is(instance, 'Object');
+
+			if(areString) {
+			
+				if(isinstance) {
+
+					if(!this.topics[topic]) {
+						this.topics[topic] = [];
+					}
+
+					this.topics[topic].push({
+						'oId': (++this.oId),
+						'instance': instance,
+						'fn': instance[toCall]
+					});
+
+					return this.oId;
+
+				} else {
+					_throwable.InvalidinstanceType();
+				}
+
+			} else {
+
+				_throwable.InvalidTopicType();
 			}
 		},
 
-		isTopicString = _verify.is(topic, 'String');
-		
-		if(isTopicString) {
+		// remove an object from the subscriptions list on a topic with its assigned oId
+		unsubscribe: function(topic, oId) {
+			
+			var isTopicString = _verify.is(topic, 'String'),
 
-			_async(function() { emit(); });
+			unsub = () => {
 
-		} else {
+				if(this.topics[topic]) {
+					
+					var topicLine = this.topics[topic];
 
-			_throwable.InvalidTopicType();
-		}
+					for(var index in topicLine) {
 
-		return true;
-	};
+						var subscriber = topicLine[index];
 
-	// subscribe an instance to a topic using a given toCall function to execute on publish
-	Bugle.prototype.subscribe = function(topic, instance, toCall) {
-		
-		// verify that param #1 & #3 are of type String
-		var areString = _verify.areAll([topic, toCall], 'String'),
-
-		// verify instance is an Object
-		isinstance = _verify.is(instance, 'Object');
-
-		if(areString) {
-		
-			if(isinstance) {
-
-				if(!this.topics[topic]) {
-					this.topics[topic] = [];
+						if(subscriber.oId === oId) {
+							topicLine.splice(index, 1);
+						};
+					}
 				}
+			};
 
-				this.topics[topic].push({
-					'oId': (++this.oId),
-					'instance': instance,
-					'fn': instance[toCall]
-				});
+			if(isTopicString) {
 
-				return this.oId;
+				_async(function() { unsub(); });
 
 			} else {
-				_throwable.InvalidinstanceType();
+
+				_throwable.InvalidTopicType();
 			}
-
-		} else {
-
-			_throwable.InvalidTopicType();
-		}
-	};
-
-
-	// remove an object from the subscriptions list on a topic with its assigned oId
-	Bugle.prototype.unsubscribe = function(topic, oId) {
-		
-		var isTopicString = _verify.is(topic, 'String'),
-
-		unsub = () => {
-
-			if(this.topics[topic]) {
-				
-				var topicLine = this.topics[topic];
-
-				for(var index in topicLine) {
-
-					var subscriber = topicLine[index];
-
-					if(subscriber.oId === oId) {
-						topicLine.splice(index, 1);
-					};
-				}
-			}
-		};
-
-		if(isTopicString) {
-
-			_async(function() { unsub(); });
-
-		} else {
-
-			_throwable.InvalidTopicType();
 		}
 	};
 
 	// user does not have to specify that silly 'new' keyword
-	return function() {
+	return function(props) {
 		return new Bugle();
 	};
 
