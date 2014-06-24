@@ -1,0 +1,80 @@
+<!-- NOT FINISHED -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Basic Bugle Example</title>
+	<script src="./../bugle.js"></script>
+</head>
+<body>
+	<div id="todo-pane">
+		<ul id="todo-list"></ul>
+		<div>
+			<label>add an item:</label>
+			<input id="todo-newItem" type="text" value="Git Push"></input>
+			<button id="todo-add">Add Item</button>
+		</div>
+	</div>
+	<script>
+
+		// this object stores todo items 
+		// these todo items can be appended to the dom using 'updateUI'
+		var todo = function(handle) {
+				
+			var list = document.getElementById(handle);
+
+			return {
+				
+				items: [
+					'git status',
+					'git diff',
+					'git commit'
+				],
+
+				// will be called by Bugle once the user adds a new todo item
+				addItem: function(topic, item) {
+					this.items.push(item);
+					this.draw();
+				},
+
+				// keep it simple for now
+				draw: function() {
+
+					list.innerHTML = '';
+
+					for(var item in this.items) {
+						list.innerHTML += '<li>' + this.items[item] + '</li>';
+					}
+				}
+			};
+		},
+
+		// general set up of feature with starting state
+		todoInstance = todo('todo-list'),
+		
+		// create a Bugle
+		bugle = Bugle();
+
+		// draw the starting ui state
+		todoInstance.draw();
+
+		// subscribe the todo feature on the 'add' topic using addItem as the event listener
+		todoId = bugle.subscribe('add', todoInstance, 'addItem');
+
+		// handle to our todo add item button
+		var todoAdd = document.getElementById('todo-add');
+
+		// attach an event listener to our button
+		todoAdd.addEventListener('click', function() {
+			
+			// get the todo value set in the text box
+			var item = document.getElementById('todo-newItem').value;
+
+			// publish to all subscribers of the 'add' topic (todoInstance current)
+			bugle.publish('add', item);
+
+		}, false)
+
+	</script>
+</body>
+</html>

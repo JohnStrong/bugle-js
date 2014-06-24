@@ -112,11 +112,11 @@ window.Bugle = ( function() {
 			var areString = _verify.areAll([topic, toCall], 'String'),
 
 			// verify instance is an Object
-			isinstance = _verify.is(instance, 'Object');
+			isObject = _verify.is(instance, 'Object');
 
 			if(areString) {
 			
-				if(isinstance) {
+				if(isObject) {
 
 					if(!this.topics[topic]) {
 						this.topics[topic] = [];
