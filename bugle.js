@@ -142,9 +142,7 @@ window.Bugle = ( function() {
 	// remove an object from the subscriptions list on a topic with its assigned oId
 	unsub: function(topic, oId) {
 		
-		var isTopicString = _verify.is(topic, 'String'),
-
-		unsub = () => {
+		var unsub = () => {
 
 			if(this.topics[topic]) {
 				
@@ -161,7 +159,7 @@ window.Bugle = ( function() {
 			}
 		};
 
-		if(isTopicString) {
+		if(_verify.is(topic, 'String')) {
 
 			_async(function() { unsub(); });
 
