@@ -31,17 +31,18 @@ window.Bugle = ( function() {
 	_throwable = (function() {
 
 		var throwError = (message) => {
-			throw new Error(message);
+			throw message;
 		};
 
 		return {
 
-			'failedToPublish': function(topic) {
-				throwError('Failed to pub to instance on topic ' + topic);
+			'failedToPublish': function(topic, error) {
+				throwError('Failed to publish to instance on topic "' + 
+					topic + '" [' + error.message + ']')
 			},
 
 			'InvalidTopicType': function() {
-				throwError('topic identifier must be of type String');
+				throwError('first paren, "topic", must be of type String');
 			},
 
 			'InvalidinstanceType': function() {
@@ -80,11 +81,11 @@ window.Bugle = ( function() {
 						args = [data, topic, index];
 
 						try {
-							obj.fn.apply(obj.instance, args);
+							obj.fn(args);
 						} catch(e) {
 
 							_async(function() { 
-								_throwable.failedToPublish(topic); 
+								_throwable.failedToPublish(topic, e); 
 							});
 						}
 					}
