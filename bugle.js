@@ -37,7 +37,7 @@ window.Bugle = ( function() {
 		return {
 
 			'failedToPublish': function(topic) {
-				throwError('Failed to publish to instance on topic ' + topic);
+				throwError('Failed to pub to instance on topic ' + topic);
 			},
 
 			'InvalidTopicType': function() {
@@ -63,9 +63,9 @@ window.Bugle = ( function() {
 
 	Bugle.prototype = {
 		
-		// publish some data to a topic
+		// pub some data to a topic
 		// notify all objects subscribed to the given topic with the data received
-		publish: function(topic, data) {
+		pub: function(topic, data) {
 
 			var emit = () => {
 
@@ -105,8 +105,8 @@ window.Bugle = ( function() {
 			return true;
 		},
 
-		// subscribe an instance to a topic using a given toCall function to execute on publish
-		subscribe: function(topic, instance, toCall) {
+		// sub an instance to a topic using a given toCall function to execute on pub
+		sub: function(topic, instance, toCall) {
 			
 			// verify that param #1 & #3 are of type String
 			var areString = _verify.areAll([topic, toCall], 'String'),

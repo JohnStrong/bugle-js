@@ -58,8 +58,8 @@
 		// draw the starting ui state
 		todoInstance.draw();
 
-		// subscribe the todo feature on the 'add' topic using addItem as the event listener
-		todoId = bugle.subscribe('add', todoInstance, 'addItem');
+		// sub the todo feature on the 'add' topic using addItem as the event listener
+		todoId = bugle.sub('add', todoInstance, 'addItem');
 
 		// handle to our todo add item button
 		var todoAdd = document.getElementById('todo-add');
@@ -70,8 +70,8 @@
 			// get the todo value set in the text box
 			var item = document.getElementById('todo-newItem').value;
 
-			// publish to all subscribers of the 'add' topic (todoInstance current)
-			bugle.publish('add', item);
+			// pub to all subscribers of the 'add' topic (todoInstance current)
+			bugle.pub('add', item);
 
 		}, false)
 

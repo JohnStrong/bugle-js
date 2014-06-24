@@ -30,6 +30,7 @@
 
 		// test instances
 		test = {
+			
 			'literal': {
 				'state': [1,2,3,4],
 				'update': function(topic, data) {
@@ -88,18 +89,18 @@
 		);
 
 
-		// subscribe myObj to 'joins' topic
+		// sub myObj to 'joins' topic
 		// use the update property function when data is published to the topic
-		var oid1 = bugle1.subscribe('joins', literalObj, 'update'),
-		oid2 = bugle1.subscribe('joins', instanceObj, 'execute');
+		var oid1 = bugle1.sub('joins', literalObj, 'update'),
+		oid2 = bugle1.sub('joins', instanceObj, 'execute');
 
-		// see the state of our publish/subscribe object
+		// see the state of our pub/sub object
 		console.log('subscribing to topic...');
 
 
-		// publish array to joins topic
+		// pub array to joins topic
 		console.log('publishing to topic...')
-		bugle1.publish('joins', [5,6,7,8]);
+		bugle1.pub('joins', [5,6,7,8]);
 
 		console.log('unsubscribing from topic...');
 		bugle1.unsubscribe('joins', oid1);
