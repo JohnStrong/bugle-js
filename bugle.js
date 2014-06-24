@@ -74,7 +74,7 @@ window.Bugle = ( function() {
 	pub: function(topic, data) {
 
 		// apply current sub object and pub args to sub function
-		var publishTo = function(subscriber, index) {
+		var publishTo = (subscriber, index) => {
 					
 			try {
 				subscriber.fn.call(subscriber.instance, data, topic, index);
@@ -90,15 +90,13 @@ window.Bugle = ( function() {
 		emit = () => {
 
 			if(this.topics[topic]) {
-				
+
 				var topicLine = this.topics[topic];
 				topicLine.forEach(publishTo);
 			}
-		},
+		};
 
-		isTopicString = _verify.is(topic, 'String');
-		
-		if(isTopicString) {
+		if(_verify.is(topic, 'String')) {
 
 			_async(function() { emit(); });
 
