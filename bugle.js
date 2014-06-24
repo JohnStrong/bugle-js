@@ -11,14 +11,17 @@ window.Bugle = ( function() {
 
 		'areAll': function(items, type) {
 		
-			var status = false,
+			var status = true,
 				self = this;
 
-			items.forEach(function(item) {
-				status = self.is(item, type);
-			});
+			for(var item in items) {
 
-			return status;
+				if(!this.is(items[item], type)) {
+					return false;
+				}
+			}
+
+			return true;
 		},
 	},
 
@@ -32,7 +35,13 @@ window.Bugle = ( function() {
 
 		var throwError = (message) => {
 			throw message;
-		};
+		},
+
+		invalids = {
+			'sub': 'USAGE [topic:String, object:Object, toCall:String]',
+			'pub': 'UASGE [topic:String, data:Any]',
+			'unsub': 'USAGE [topic:String, oId:Number]'
+		}
 
 		return {
 
@@ -41,12 +50,8 @@ window.Bugle = ( function() {
 					topic + '" [' + error.message + ']')
 			},
 
-			'InvalidTopicType': function() {
-				throwError('first paren, "topic", must be of type String');
-			},
-
-			'InvalidinstanceType': function() {
-				throwError('instance value being pushed to topic must be of type Object');
+			'invalidArgs': function(invalid) {
+				throwError(invalids[invalid]);
 			}
 		};
 
@@ -64,115 +69,108 @@ window.Bugle = ( function() {
 
 	Bugle.prototype = {
 		
-		// pub some data to a topic
-		// notify all objects subscribed to the given topic with the data received
-		pub: function(topic, data) {
+	// notify all objects subscribed to the given topic with the data received
+	pub: function(topic, data) {
 
-			// apply current sub object and pub args to sub function
-			var publishTo = function(subscriber, index) {
-						
-				try {
-					subscriber.fn.call(subscriber.instance, data, topic, index);
-				} catch(e) {
-
-					_async(function() { 
-						_throwable.failedToPublish(topic, e); 
-					});
-				}
-
-			},
-
-			emit = () => {
-
-				if(this.topics[topic]) {
-
-					var topicLine = this.topics[topic];
-
-					// execute each topic in topic line in order
-					topicLine.forEach(publishTo);
-				}
-			},
-
-			isTopicString = _verify.is(topic, 'String');
-			
-			if(isTopicString) {
-
-				_async(function() { emit(); });
-
-			} else {
-
-				_throwable.InvalidTopicType();
-			}
-
-			return true;
-		},
-
-		// sub an instance to a topic using a given toCall function to execute on pub
-		sub: function(topic, instance, toCall) {
-			
-			// verify that param #1 & #3 are of type String
-			var areString = _verify.areAll([topic, toCall], 'String'),
-
-			// verify instance is an Object
-			isObject = _verify.is(instance, 'Object');
-
-			if(areString) {
-			
-				if(isObject) {
-
-					if(!this.topics[topic]) {
-						this.topics[topic] = [];
-					}
-
-					this.topics[topic].push({
-						'oId': (++this.oId),
-						'instance': instance,
-						'fn': instance[toCall]
-					});
-
-					return this.oId;
-
-				} else {
-					_throwable.InvalidinstanceType();
-				}
-
-			} else {
-
-				_throwable.InvalidTopicType();
-			}
-		},
-
-		// remove an object from the subscriptions list on a topic with its assigned oId
-		unsub: function(topic, oId) {
-			
-			var isTopicString = _verify.is(topic, 'String'),
-
-			unsub = () => {
-
-				if(this.topics[topic]) {
+		// apply current sub object and pub args to sub function
+		var publishTo = function(subscriber, index) {
 					
-					var topicLine = this.topics[topic];
+			try {
+				subscriber.fn.call(subscriber.instance, data, topic, index);
+			} catch(e) {
 
-					// loop for specified oId until we get a match
-					for(var index in topicLine) {
-
-						if(topicLine[index].oId === oId) {
-							topicLine.splice(index, 1);
-							return;
-						};
-					}
-				}
-			};
-
-			if(isTopicString) {
-
-				_async(function() { unsub(); });
-
-			} else {
-
-				_throwable.InvalidTopicType();
+				_async(function() { 
+					_throwable.failedToPublish(topic, e); 
+				});
 			}
+
+		},
+
+		emit = () => {
+
+			if(this.topics[topic]) {
+
+				var topicLine = this.topics[topic];
+
+				// execute each topic in topic line in order
+				topicLine.forEach(publishTo);
+			}
+		},
+
+		isTopicString = _verify.is(topic, 'String');
+		
+		if(isTopicString) {
+
+			_async(function() { emit(); });
+
+		} else {
+
+			_throwable.invalidArgs('pub');
 		}
+
+		return true;
+	},
+
+	// sub an instance to a topic using a given toCall function to execute on pub
+	sub: function(topic, instance, toCall) {
+		
+		// verify that param #1 & #3 are of type String
+		var areString = _verify.areAll([topic, toCall], 'String'),
+
+		// verify instance is an Object
+		isObject = _verify.is(instance, 'Object');
+
+		if(areString && isObject) {
+		
+			if(!this.topics[topic]) {
+				this.topics[topic] = [];
+			}
+
+			this.topics[topic].push({
+				'oId': (++this.oId),
+				'instance': instance,
+				'fn': instance[toCall]
+			});
+
+			return this.oId;
+
+		} else {
+			_throwable.invalidArgs('sub');
+		}
+	},
+
+	// remove an object from the subscriptions list on a topic with its assigned oId
+	unsub: function(topic, oId) {
+		
+		var isTopicString = _verify.is(topic, 'String'),
+
+		unsub = () => {
+
+			if(this.topics[topic]) {
+				
+				var topicLine = this.topics[topic];
+
+				// loop for specified oId until we get a match
+				for(var index in topicLine) {
+
+					if(topicLine[index].oId === oId) {
+						topicLine.splice(index, 1);
+						return;
+					};
+				}
+			}
+		};
+
+		if(isTopicString) {
+
+			_async(function() { unsub(); });
+
+		} else {
+
+			_throwable.invalidArgs('unsub');
+		}
+	}
+
 	};
 
 	// user does not have to specify that silly 'new' keyword
