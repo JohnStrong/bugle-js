@@ -81,7 +81,7 @@ window.Bugle = ( function() {
 						args = [data, topic, index];
 
 						try {
-							obj.fn(args);
+							obj.fn.apply(obj.instance, args);
 						} catch(e) {
 
 							_async(function() { 
