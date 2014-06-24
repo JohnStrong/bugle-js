@@ -77,7 +77,7 @@ window.Bugle = ( function() {
 					for(var index in topicLine) {
 
 						var obj = topicLine[index],
-						args = [topic, data, index];
+						args = [data, topic, index];
 
 						try {
 							obj.fn.apply(obj.instance, args);

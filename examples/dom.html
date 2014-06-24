@@ -32,7 +32,7 @@
 				],
 
 				// will be called by Bugle once the user adds a new todo item
-				addItem: function(topic, item) {
+				addItem: function(item, topic) { 
 					this.items.push(item);
 					this.draw();
 				},

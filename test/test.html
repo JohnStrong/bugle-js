@@ -33,7 +33,7 @@
 			
 			'literal': {
 				'state': [1,2,3,4],
-				'update': function(topic, data) {
+				'update': function(data, topic, index) {
 					this.state = this.state.concat(data);
 				}
 			},
@@ -44,7 +44,7 @@
 					
 					this.state = [5,4,3,2,1];
 				
-					this.execute = function(topic, data) {
+					this.execute = function(data, topic, index) {
 						this.state.push(data);
 					}
 
