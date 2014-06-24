@@ -68,15 +68,11 @@ window.Bugle = ( function() {
 		// notify all objects subscribed to the given topic with the data received
 		pub: function(topic, data) {
 
-			var args = [data, topic],
-
 			// apply current sub object and pub args to sub function
-			publishTo = function(subscriber, index) {
+			var publishTo = function(subscriber, index) {
 						
-				args.push(index);
-
 				try {
-					subscriber.fn.apply(subscriber.instance, args);
+					subscriber.fn.call(subscriber.instance, data, topic, index);
 				} catch(e) {
 
 					_async(function() { 
