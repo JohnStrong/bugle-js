@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Extended Bugle test</title>
+</head>
+<body>
+	<script src="./../bugle.js"></script>
+	<script>
+
+		const async = function(fn) {
+			setTimeout(fn, 0);
+		},
+
+		// loop continuously until a condition is met
+		when = function(condition, then) {
+
+			async(function loop() {
+
+				if(condition()) {
+					then();
+				} else {
+					async(loop);
+				}
+			});
+		};
+
+	</script>
+	<script>
+
+		'use strict';
+
+		function Environment() { 
+			this.state = [];
+		};
+
+		Environment.prototype.react = function(data) {
+			this.state = data;
+		};
+
+		// we can extended an object with custom properties
+		// NOTE: init must be defined if we want custom state
+		var ExtenedBugle = Bugle({
+			
+			'init': function(array) {
+				this.state = array;
+			},
+
+			'input': function(data) {
+				this.pub('cause', data);
+			},
+
+			'update': function(data1, data2) {
+				
+				this.state = data1.concat(data2);
+
+				console.log(this.state);
+			}
+		}),
+
+		// init ExtendedBugle with empty array
+		// NOTE: calls 'init' method
+		extendedBugle = ExtenedBugle([]),
+
+		environment = new Environment();
+
+		// environment state should become [1,2,3,4]
+		when(
+			function() {
+				return environment.state.length > 0;
+			},
+			function() {
+				console.log('passed test case...');
+				console.log(environment);
+			}
+		);
+
+		extendedBugle.sub('cause', environment, 'react');
+		extendedBugle.input([1,2,3,4]);
+
+	</script>

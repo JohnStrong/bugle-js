@@ -50,7 +50,7 @@
 		}
 	},
 
-	publish = function(topic) {
+	_publish = function(topic) {
 
 		// get user arguments to the function call
 		var args = Array.prototype.slice.call(arguments, 1),
@@ -91,7 +91,7 @@
 		}
 	},
 
-	subscribe = function(topic, instance, toCall) {
+	_subscribe = function(topic, instance, toCall) {
 		
 		// verify that param #1 & #3 are of type String
 		var areString = _assert.areAll([topic, toCall], 'String'),
@@ -119,7 +119,7 @@
 		}
 	},
 
-	unsubscribe = function(topic, oId) {
+	_unsubscribe = function(topic, oId) {
 		
 		var unsub = () => {
 
@@ -150,28 +150,75 @@
 
 	function Bugle() {
 
-		// holds each topic along with its subscribers
-		this.topics = [];
+		// if no 'new' keyword specified by user
+		if(this instanceof Bugle) {
 
-		// tracks the location of an object instance on a topic
-		this.oId = 0;
+			// holds each topic along with its subscribers
+			this.topics = [];
+			// tracks the location of an object instance on a topic
+			this.oId = 0;
+
+		} else {
+
+			return new Bugle();
+		}
 	}
 
 	Bugle.prototype = {
 		
 		// notify all objects subscribed to the given topic with the data received
-		pub: publish,
+		pub: _publish,
 
 		// subscribe an object instance to a topic, execute with the 'toCall' function
-		sub: subscribe,
+		sub: _subscribe,
 
 		// remove an object from the subscriptions list on a topic with its assigned oId
-		unsub: unsubscribe
+		unsub: _unsubscribe
 	};
 
-	// user does not have to specify that silly 'new' keyword
-	window.Bugle = function() {
-		return new Bugle();
+	// extend a Bugle object with custom object properties
+	const _extend = function(obj) {
+
+		var Base = function() {
+
+			if(this instanceof Base) {
+			
+				this.topics = [];
+				this.oId = 0;
+
+				this.init.apply(this, arguments);
+
+			} else {
+				return new Base(arguments);
+			}
+		};
+
+		// attach pub, sub & unsub
+		Base.prototype = Bugle.prototype;
+
+		// attach all custom methods to the Bugle object
+		for(var method in obj) {
+			Base.prototype[method] = obj[method];
+		}
+
+		// when no init found, assume an empty constructor
+		if(!Base.prototype.init) {
+			Base.prototype.init = function() { };
+		}
+
+		return Base;
+	}
+
+	window.Bugle = function(obj) {
+
+		// can extend the Bugle object with custom methods
+		if(obj) {
+			if(_assert.is(obj, 'Object')) {
+				return _extend(obj);
+			}
+		}
+
+		return Bugle();
 	};
 
 } )();

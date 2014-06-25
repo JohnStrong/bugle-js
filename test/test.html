@@ -6,10 +6,7 @@
 </head>
 <body>
 	<script src="./../bugle.js"></script>
-	<script type="text/javascript">
-		// will add more comprehensive examples and tests to the project at a later date
-
-		'use strict';
+	<script>
 
 		const async = function(fn) {
 			setTimeout(fn, 0);
@@ -26,10 +23,16 @@
 					async(loop);
 				}
 			});
-		},
+		};
+
+	</script>
+	<script type="text/javascript">
+		// will add more comprehensive examples and tests to the project at a later date
+
+		'use strict';
 
 		// test instances
-		test = {
+		var test = {
 			
 			'literal': {
 				'state': [1,2,3,4],
