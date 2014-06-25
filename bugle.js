@@ -1,4 +1,4 @@
-window.Bugle = ( function() {
+;( function() {
 	
 	'use strict';
 
@@ -28,7 +28,7 @@ window.Bugle = ( function() {
 		setTimeout(fn, 0);
 	},
 
-	
+
 	// convenience object for throwing helpful errors
 	_error = {
 
@@ -168,7 +168,7 @@ window.Bugle = ( function() {
 	};
 
 	// user does not have to specify that silly 'new' keyword
-	return function(props) {
+	window.Bugle = function() {
 		return new Bugle();
 	};
 
