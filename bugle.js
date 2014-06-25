@@ -52,7 +52,10 @@
 
 	publish = function(topic) {
 
+		// get user arguments to the function call
 		var args = Array.prototype.slice.call(arguments, 1),
+
+		self = this,
 
 		// apply current sub object and pub args to sub function
 		publishTo = (subscriber) => {
@@ -66,27 +69,26 @@
 				});
 			}
 
-		},
-
-		emit = () => {
-
-			if(this.topics[topic]) {
-
-				var topicLine = this.topics[topic];
-				topicLine.forEach(publishTo);
-			}
 		};
 
 		if(_assert.is(topic, 'String')) {
 
-			_async(function() { emit(); });
+			// publish args to each subscriber on topic
+			_async(function() {
+				
+				if(self.topics[topic]) {
+
+					var topicLine = self.topics[topic];
+					topicLine.forEach(publishTo);
+				}
+			});
+
+			return true;
 
 		} else {
 
 			throw _error.pub();
 		}
-
-		return true;
 	},
 
 	subscribe = function(topic, instance, toCall) {
@@ -160,7 +162,7 @@
 		// notify all objects subscribed to the given topic with the data received
 		pub: publish,
 
-		// sub an instance to a topic using a given toCall function to execute on pub
+		// subscribe an object instance to a topic, execute with the 'toCall' function
 		sub: subscribe,
 
 		// remove an object from the subscriptions list on a topic with its assigned oId

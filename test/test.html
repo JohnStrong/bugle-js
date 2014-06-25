@@ -108,6 +108,9 @@
 		bugle1.unsub('joins', oid1);
 		bugle1.unsub('joins', oid2);
 
+		console.log('publish should not mutate object state')
+		bugle1.pub('joins', [1,2,4,6]);
+
 	</script>
 </body>
 </html>
