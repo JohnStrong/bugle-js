@@ -3,7 +3,7 @@ window.Bugle = ( function() {
 	'use strict';
 
 	// validation util functions
-	const _verify = {
+	const _assert = {
 		
 		'is': function(obj, type) {
 			return Object.prototype.toString.call(obj).slice(8, -1) === type;
@@ -28,46 +28,29 @@ window.Bugle = ( function() {
 		setTimeout(fn, 0);
 	},
 
+	
 	// convenience object for throwing helpful errors
-	_throwable = (function() {
+	_error = {
 
-		var throwError = (message) => {
-			throw message;
+		'sub': function() {
+			return 'USAGE [ topic:String, object:Object, toCall:String ]';
 		},
 
-		invalids = {
-			'sub': 'USAGE [ topic:String, object:Object, toCall:String ]',
-			'pub': 'UASGE [ topic:String, data:Array[Any...] ]',
-			'unsub': 'USAGE [topic:String, oId:Number]'
+		'pub': function() {
+			return 'UASGE [ topic:String, data:Array[Any...] ]';
+		},
+
+		'unsub': function() {
+			return 'USAGE [topic:String, oId:Number]';
+		},
+
+		'pubError': function(topic, error) {
+			return 'Failed to publish to instance on topic "' + 
+				topic + '" [' + error.message + ']';
 		}
+	},
 
-		return {
-
-			'failedToPublish': function(topic, error) {
-				throwError('Failed to publish to instance on topic "' + 
-					topic + '" [' + error.message + ']')
-			},
-
-			'invalidArgs': function(invalid) {
-				throwError(invalids[invalid]);
-			}
-		};
-
-	})();
-
-	function Bugle() {
-
-		// holds each topic along with its subscribers
-		this.topics = [];
-
-		// tracks the location of an object instance on a topic
-		this.oId = 0;
-	}
-
-	Bugle.prototype = {
-		
-	// notify all objects subscribed to the given topic with the data received
-	pub: function(topic) {
+	publish = function(topic) {
 
 		var args = Array.prototype.slice.call(arguments, 1),
 
@@ -79,7 +62,7 @@ window.Bugle = ( function() {
 			} catch(e) {
 
 				_async(function() { 
-					_throwable.failedToPublish(topic, e); 
+					throw _error.pubError(topic, e); 
 				});
 			}
 
@@ -94,26 +77,25 @@ window.Bugle = ( function() {
 			}
 		};
 
-		if(_verify.is(topic, 'String')) {
+		if(_assert.is(topic, 'String')) {
 
 			_async(function() { emit(); });
 
 		} else {
 
-			_throwable.invalidArgs('pub');
+			throw _error.pub();
 		}
 
 		return true;
 	},
 
-	// sub an instance to a topic using a given toCall function to execute on pub
-	sub: function(topic, instance, toCall) {
+	subscribe = function(topic, instance, toCall) {
 		
 		// verify that param #1 & #3 are of type String
-		var areString = _verify.areAll([topic, toCall], 'String'),
+		var areString = _assert.areAll([topic, toCall], 'String'),
 
 		// verify instance is an Object
-		isObject = _verify.is(instance, 'Object');
+		isObject = _assert.is(instance, 'Object');
 
 		if(areString && isObject) {
 		
@@ -130,12 +112,12 @@ window.Bugle = ( function() {
 			return this.oId;
 
 		} else {
-			_throwable.invalidArgs('sub');
+
+			throw _error.sub();
 		}
 	},
 
-	// remove an object from the subscriptions list on a topic with its assigned oId
-	unsub: function(topic, oId) {
+	unsubscribe = function(topic, oId) {
 		
 		var unsub = () => {
 
@@ -154,16 +136,35 @@ window.Bugle = ( function() {
 			}
 		};
 
-		if(_verify.is(topic, 'String')) {
+		if(_assert.is(topic, 'String')) {
 
 			_async(function() { unsub(); });
 
 		} else {
 
-			_throwable.invalidArgs('unsub');
+			throw _error.unsub();
 		}
+	};
+
+	function Bugle() {
+
+		// holds each topic along with its subscribers
+		this.topics = [];
+
+		// tracks the location of an object instance on a topic
+		this.oId = 0;
 	}
 
+	Bugle.prototype = {
+		
+		// notify all objects subscribed to the given topic with the data received
+		pub: publish,
+
+		// sub an instance to a topic using a given toCall function to execute on pub
+		sub: subscribe,
+
+		// remove an object from the subscriptions list on a topic with its assigned oId
+		unsub: unsubscribe
 	};
 
 	// user does not have to specify that silly 'new' keyword
