@@ -151,17 +151,15 @@
 	function Bugle() {
 
 		// if no 'new' keyword specified by user
-		if(this instanceof Bugle) {
-
-			// holds each topic along with its subscribers
-			this.topics = [];
-			// tracks the location of an object instance on a topic
-			this.oId = 0;
-
-		} else {
+		if(!(this instanceof Bugle)) {
 
 			return new Bugle();
 		}
+
+		// holds each topic along with its subscribers
+		this.topics = [];
+		// tracks the location of an object instance on a topic
+		this.oId = 0;
 	}
 
 	Bugle.prototype = {
@@ -181,16 +179,15 @@
 
 		var Base = function() {
 
-			if(this instanceof Base) {
-			
-				this.topics = [];
-				this.oId = 0;
+			if(!(this instanceof Base)) {
 
-				this.init.apply(this, arguments);
-
-			} else {
 				return new Base(arguments);
 			}
+			
+			this.topics = [];
+			this.oId = 0;
+
+			this.init.apply(this, arguments);
 		};
 
 		// attach pub, sub & unsub
