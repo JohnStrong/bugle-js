@@ -53,7 +53,7 @@
 
 		// when no init found, assume an empty constructor
 		if(!Base.prototype._init) {
-			Base.prototype.init = function() { };
+			Base.prototype._init = function() { };
 		}
 
 		return Base;
@@ -216,11 +216,11 @@
 
 	window.Bugle = function(obj) {
 
-		// if undefined, can assume no args
-		if(obj !== undefined) {
+		// check for option arg
+		if(arguments.length) {
 
 			// verify stateful & of type Object
-			if(obj && _assert.is(obj, 'Object')) {
+			if(_assert.is(obj, 'Object')) {
 				return _extend(obj, Bugle);
 
 			} else {
