@@ -216,10 +216,11 @@
 
 	window.Bugle = function(obj) {
 
-		// can extend the Bugle object with custom methods
-		if(obj) {
-			if(_assert.is(obj, 'Object')) {
+		// if undefined, can assume no args
+		if(obj !== undefined) {
 
+			// verify stateful & of type Object
+			if(obj && _assert.is(obj, 'Object')) {
 				return _extend(obj, Bugle);
 
 			} else {
