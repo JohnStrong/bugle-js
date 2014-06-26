@@ -13,6 +13,7 @@
 		},
 
 		// loop continuously until a condition is met
+		// TODO: merge with assert
 		when = function(condition, then) {
 
 			async(function loop() {
@@ -23,6 +24,29 @@
 					async(loop);
 				}
 			});
+		},
+
+		// simple assertion util
+		assert = function(desc) {
+
+			var pass = function() {
+				console.log('PASS: ' + desc);
+			},
+
+			fail = function() {
+				console.log('FAIL: ' + desc);
+			};
+
+			return {
+				
+				with: function(fn) {
+					if(fn()) {
+						pass();
+					} else {
+						fail();
+					}
+				}
+			};
 		};
 
 	</script>
@@ -71,6 +95,28 @@
 		environment1 = new Environment1([]),
 		environment2 = new Environment2([1,2,3]);
 
+
+		extendedBugle.sub('cause', environment1, 'store');
+		extendedBugle.sub('cause', environment2, 'append');
+
+		extendedBugle.input([1,2,3,4]);
+
+		/************************
+		 *
+		 *	TEST CASES...
+		 *
+		 ***********************/
+
+		assert('extendedBugle should have Bugle properties')
+		
+		.with(function() {
+			return (
+				extendedBugle.sub && 
+				extendedBugle.pub && 
+				extendedBugle.unsub
+			);
+		});
+
 		// 'environment1' state should become [1,2,3,4]
 		when(
 			function() {
@@ -106,11 +152,6 @@
 				console.log(extendedBugle.topics['cause']);
 			}
 		)
-
-		extendedBugle.sub('cause', environment1, 'store');
-		extendedBugle.sub('cause', environment2, 'append');
-
-		extendedBugle.input([1,2,3,4]);
 
 	</script>
 	<script type="text/template">
