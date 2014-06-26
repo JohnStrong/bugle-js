@@ -72,7 +72,7 @@
 		environment1 = new Environment1([]),
 		environment2 = new Environment2([1,2,3]);
 
-		// environment1 state should become [1,2,3,4]
+		// 'environment1' state should become [1,2,3,4]
 		when(
 			function() {
 				return environment1.state.length === 4;
@@ -85,7 +85,7 @@
 			}
 		);
 
-		// environment2 state should be appended on 'cause' publish
+		// 'environment2' state should be appended on 'cause' publish
 		when(
 			function() {
 				return environment2.state.length > 3;
@@ -97,6 +97,16 @@
 				console.log(environment2.state);
 			}
 		);
+
+		// verify that two objects are added to 'cause' topic on 'extendedBugle'
+		when(
+			function() {
+				return extendedBugle.topics['cause'].length === 2;
+			},
+			function() {
+				console.log(extendedBugle.topics['cause']);
+			}
+		)
 
 		extendedBugle.sub('cause', environment1, 'store');
 		extendedBugle.sub('cause', environment2, 'append');
