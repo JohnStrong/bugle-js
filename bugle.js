@@ -23,6 +23,42 @@
 		},
 	},
 
+	// extend an object with another objects properties/state
+	// TODO: make it faster
+	_extend = function(obj, extending) {
+
+		var Base = function() {
+
+			if(!(this instanceof Base)) {
+
+				return new Base(arguments);
+			}
+
+			this._super.apply(this, arguments);
+			
+			this._init.apply(this, arguments);
+		};
+
+
+		// attach pub, sub & unsub
+		Base.prototype = extending.prototype;
+
+		// handle to object extending's constructor
+		Base.prototype._super = extending;
+
+		// attach all custom methods to the Bugle object
+		for(var method in obj) {
+			Base.prototype[method] = obj[method];
+		}
+
+		// when no init found, assume an empty constructor
+		if(!Base.prototype._init) {
+			Base.prototype.init = function() { };
+		}
+
+		return Base;
+	},
+
 	// ensures the we get 'true' sync behaviour 
 	_async = function(fn) {
 		setTimeout(fn, 0);
@@ -47,6 +83,10 @@
 		'pubError': function(topic, error) {
 			return 'Failed to publish to instance on topic "' + 
 				topic + '" [' + error.message + ']';
+		},
+
+		'notAnObject': function() {
+			return 'argument to Bugle must be a literal object';
 		}
 	},
 
@@ -174,44 +214,17 @@
 		unsub: _unsubscribe
 	};
 
-	// extend a Bugle object with custom object properties
-	const _extend = function(obj) {
-
-		var Base = function() {
-
-			if(!(this instanceof Base)) {
-
-				return new Base(arguments);
-			}
-			
-			this.topics = [];
-			this.oId = 0;
-
-			this.init.apply(this, arguments);
-		};
-
-		// attach pub, sub & unsub
-		Base.prototype = Bugle.prototype;
-
-		// attach all custom methods to the Bugle object
-		for(var method in obj) {
-			Base.prototype[method] = obj[method];
-		}
-
-		// when no init found, assume an empty constructor
-		if(!Base.prototype.init) {
-			Base.prototype.init = function() { };
-		}
-
-		return Base;
-	}
-
 	window.Bugle = function(obj) {
 
 		// can extend the Bugle object with custom methods
 		if(obj) {
 			if(_assert.is(obj, 'Object')) {
-				return _extend(obj);
+
+				return _extend(obj, Bugle);
+
+			} else {
+
+				throw _error.notAnObject();
 			}
 		}
 

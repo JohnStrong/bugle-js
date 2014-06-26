@@ -26,21 +26,89 @@
 		};
 
 	</script>
-	<script>
+	<script type="text/javascript">
 
 		'use strict';
 
-		function Environment() { 
-			this.state = [];
+		function Environment1(state) { 
+			this.state = state;
 		};
 
-		Environment.prototype.react = function(data) {
+		Environment1.prototype.store = function(data) {
 			this.state = data;
+		};
+
+		function Environment2(state) { 
+			this.state = state;
+		};
+
+		Environment2.prototype.append = function(data) {
+			this.state = this.state.concat(data);
 		};
 
 		// we can extended an object with custom properties
 		// NOTE: init must be defined if we want custom state
 		var ExtenedBugle = Bugle({
+			
+			'_init': function(array) {
+				this.state = array;
+			},
+
+			'input': function(data) {
+				this.pub('cause', data);
+			},
+
+			'update': function(data1, data2) {
+				
+				this.state = data1.concat(data2);
+			}
+		}),
+
+		// init ExtendedBugle with empty array
+		// NOTE: calls 'init' method
+		extendedBugle = ExtenedBugle([]),
+
+		// instantiate our environment object
+		environment1 = new Environment1([]),
+		environment2 = new Environment2([1,2,3]);
+
+		// environment1 state should become [1,2,3,4]
+		when(
+			function() {
+				return environment1.state.length === 4;
+			},
+			function() {
+				console.log('passed test case environment1...');
+
+				console.log(environment1);
+				console.log(environment1.state);
+			}
+		);
+
+		// environment2 state should be appended on 'cause' publish
+		when(
+			function() {
+				return environment2.state.length > 3;
+			},
+			function() {
+				console.log('passed test case environment2...');
+
+				console.log(environment2);
+				console.log(environment2.state);
+			}
+		);
+
+		extendedBugle.sub('cause', environment1, 'store');
+		extendedBugle.sub('cause', environment2, 'append');
+
+		extendedBugle.input([1,2,3,4]);
+
+	</script>
+	<script type="text/template">
+
+		function ConstructorExtends() { }
+
+		ConstructorExtends.prototype = {
 			
 			'init': function(array) {
 				this.state = array;
@@ -56,26 +124,8 @@
 
 				console.log(this.state);
 			}
-		}),
-
-		// init ExtendedBugle with empty array
-		// NOTE: calls 'init' method
-		extendedBugle = ExtenedBugle([]),
-
-		environment = new Environment();
-
-		// environment state should become [1,2,3,4]
-		when(
-			function() {
-				return environment.state.length > 0;
-			},
-			function() {
-				console.log('passed test case...');
-				console.log(environment);
-			}
-		);
-
-		extendedBugle.sub('cause', environment, 'react');
-		extendedBugle.input([1,2,3,4]);
+		};
 
 	</script>
+</body>
+</html>
