@@ -89,28 +89,32 @@
 		}
 	},
 
-	_publish = function(topic) {
+	// apply current sub object and pub args to sub function
+	_publishTo = function(topic, data) {
 
-		// get user arguments to the function call
-		var args = Array.prototype.slice.call(arguments, 1),
-
-		self = this,
-
-		// apply current sub object and pub args to sub function
-		publishTo = (subscriber) => {
-					
+		return function(subscriber) {
+				
 			try {
-				subscriber.fn.apply(subscriber.instance, args.concat(topic));
+				subscriber
+					.fn.apply(subscriber.instance, data.concat(topic));
+
 			} catch(e) {
 
 				_async(function() { 
 					throw _error.pubError(topic, e); 
 				});
 			}
+		}
+	},
 
-		};
+	// notify all objects subscribed to the given topic with the data received
+	_publish = function(topic) {
+
+		var self = this;
 
 		if(_assert.is(topic, 'String')) {
+
+			var args = Array.prototype.slice.call(arguments, 1);
 
 			// publish args to each subscriber on topic
 			_async(function() {
@@ -118,11 +122,9 @@
 				if(self.topics[topic]) {
 
 					var topicLine = self.topics[topic];
-					topicLine.forEach(publishTo);
+					topicLine.forEach(_publishTo(topic, args));
 				}
 			});
-
-			return true;
 
 		} else {
 
@@ -130,12 +132,13 @@
 		}
 	},
 
+	// subscribe an object instance to a topic, execute with the 'toCall' function
 	_subscribe = function(topic, instance, toCall) {
 		
 		// verify that param #1 & #3 are of type String
 		var areString = _assert.areAll([topic, toCall], 'String'),
 
-		// verify instance is an Object
+		// instance should be of type Object
 		isObject = _assert.is(instance, 'Object');
 
 		if(areString && isObject) {
@@ -158,28 +161,29 @@
 		}
 	},
 
+	// remove an object from the subscriptions list on a topic with its assigned oId
 	_unsubscribe = function(topic, oId) {
+
+		var self = this;
 		
-		var unsub = () => {
-
-			if(this.topics[topic]) {
-				
-				var topicLine = this.topics[topic];
-
-				// loop for specified oId until we get a match
-				for(var index in topicLine) {
-
-					if(topicLine[index].oId === oId) {
-						topicLine.splice(index, 1);
-						return;
-					};
-				}
-			}
-		};
-
 		if(_assert.is(topic, 'String')) {
 
-			_async(function() { unsub(); });
+			_async(function() {
+
+				var topicLine = self.topics[topic];
+				
+				if(topicLine) {
+				
+					// loop for specified oId until we get a match
+					for(var index in topicLine) {
+
+						if(topicLine[index].oId === oId) {
+							topicLine.splice(index, 1);
+							return;
+						};
+					}
+				}
+			});
 
 		} else {
 
@@ -197,19 +201,17 @@
 
 		// holds each topic along with its subscribers
 		this.topics = [];
+		
 		// tracks the location of an object instance on a topic
 		this.oId = 0;
 	}
 
 	Bugle.prototype = {
 		
-		// notify all objects subscribed to the given topic with the data received
 		pub: _publish,
 
-		// subscribe an object instance to a topic, execute with the 'toCall' function
 		sub: _subscribe,
 
-		// remove an object from the subscriptions list on a topic with its assigned oId
 		unsub: _unsubscribe
 	};
 
