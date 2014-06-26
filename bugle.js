@@ -5,8 +5,8 @@
 	// validation util functions
 	const _assert = {
 		
-		'is': function(obj, type) {
-			return Object.prototype.toString.call(obj).slice(8, -1) === type;
+		'is': function(methods, type) {
+			return Object.prototype.toString.call(methods).slice(8, -1) === type;
 		},
 
 		// apply type checking to a collection
@@ -24,39 +24,38 @@
 	},
 
 	// extend an object with another objects properties/state
-	// TODO: make it faster
-	_extend = function(obj, extending) {
+	// returns a new object, leaving both source & destination untouched
+	_extend = function(methods, parent) {
 
-		var Base = function() {
+		var Builder = function() {
 
-			if(!(this instanceof Base)) {
+			if(!(this instanceof Builder)) {
 
-				return new Base(arguments);
+				return new Builder(arguments);
 			}
 
 			this._super.apply(this, arguments);
-			
 			this._init.apply(this, arguments);
 		};
 
 
 		// attach pub, sub & unsub
-		Base.prototype = extending.prototype;
+		Builder.prototype = parent.prototype;
 
-		// handle to object extending's constructor
-		Base.prototype._super = extending;
+		// handle to object parent's constructor
+		Builder.prototype._super = parent;
 
 		// attach all custom methods to the Bugle object
-		for(var method in obj) {
-			Base.prototype[method] = obj[method];
+		for(var method in methods) {
+			Builder.prototype[method] = methods[method];
 		}
 
 		// when no init found, assume an empty constructor
-		if(!Base.prototype._init) {
-			Base.prototype._init = function() { };
+		if(!Builder.prototype._init) {
+			Builder.prototype._init = function() { };
 		}
 
-		return Base;
+		return Builder;
 	},
 
 	// ensures the we get 'true' sync behaviour 
@@ -214,14 +213,14 @@
 		unsub: _unsubscribe
 	};
 
-	window.Bugle = function(obj) {
+	window.Bugle = function(methods) {
 
 		// check for option arg
 		if(arguments.length) {
 
 			// verify stateful & of type Object
-			if(_assert.is(obj, 'Object')) {
-				return _extend(obj, Bugle);
+			if(_assert.is(methods, 'Object')) {
+				return _extend(methods, Bugle);
 
 			} else {
 
