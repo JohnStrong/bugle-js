@@ -19,50 +19,53 @@
 
 		// this object stores todo items 
 		// these todo items can be appended to the dom using 'updateUI'
-		var todo = function(handle) {
+
+		// create a new Bugle instance
+		var	CustomBugle = Bugle({
+
+			// handle to our todo list
+			'list': document.getElementById('todo-list'),
+
+			// construct our new Bugle under the hood
+			'_init': function() {
 				
-			var list = document.getElementById(handle);
+				this.draw();
 
-			return {
+				// subscribe this object instance to the 'add' topic
+				// call 'addItem' when data is published to the topic
+				this.sub('add', this, 'addItem');
+			},
 				
-				items: [
-					'git status',
-					'git diff',
-					'git commit'
-				],
+			'items': [
+				'git status',
+				'git diff',
+				'git commit'
+			],
 
-				// will be called by Bugle once the user adds a new todo item
-				addItem: function(item, topic) { 
-					this.items.push(item);
-					this.draw();
-				},
+			// will be called by Bugle once the user adds a new todo item
+			'addItem': function(item, topic) { 
+				this.items.push(item);
+				this.draw();
+			},
 
-				// keep it simple for now
-				draw: function() {
+			// keep it simple for now
+			'draw': function() {
 
-					list.innerHTML = '';
+				this.list.innerHTML = '';
 
-					for(var item in this.items) {
-						list.innerHTML += '<li>' + this.items[item] + '</li>';
-					}
+				for(var item in this.items) {
+					this.list.innerHTML += '<li>' + this.items[item] + '</li>';
 				}
-			};
-		},
+			}
 
-		// general set up of feature with starting state
-		todoInstance = todo('todo-list'),
-		
-		// create a Bugle
-		bugle = Bugle();
+		});
 
-		// draw the starting ui state
-		todoInstance.draw();
-
-		// sub the todo feature on the 'add' topic using addItem as the event listener
-		todoId = bugle.sub('add', todoInstance, 'addItem');
+		// run our custom bugle instance
+		// note: passes object args to '_init' member
+		var bugle = CustomBugle(),
 
 		// handle to our todo add item button
-		var todoAdd = document.getElementById('todo-add');
+		todoAdd = document.getElementById('todo-add');
 
 		// attach an event listener to our button
 		todoAdd.addEventListener('click', function() {
@@ -70,7 +73,7 @@
 			// get the todo value set in the text box
 			var item = document.getElementById('todo-newItem').value;
 
-			// pub to all subscribers of the 'add' topic (todoInstance current)
+			// publish input text value to the 'add' topic
 			bugle.pub('add', item);
 
 		}, false)
