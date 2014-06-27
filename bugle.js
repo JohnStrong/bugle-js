@@ -1,5 +1,5 @@
-;( function() {
-	
+;(function () {
+
 	'use strict';
 
 	// validation util functions
@@ -11,10 +11,10 @@
 
 		// apply type checking to a collection
 		'areAll': function(items, type) {
-		
-			for(var item in items) {
+			
+			for(var ith = 0, len = items.length;  ith < len; ith++) {
 
-				if(!this.is(items[item], type)) {
+				if(!this.is(items[ith], type)) {
 					return false;
 				}
 			}
@@ -47,7 +47,9 @@
 
 		// attach all custom methods to the Bugle object
 		for(var method in methods) {
-			Builder.prototype[method] = methods[method];
+			if(methods.hasOwnProperty(method)) {
+				Builder.prototype[method] = methods[method];
+			}
 		}
 
 		// when no init found, assume an empty constructor
@@ -104,7 +106,7 @@
 					throw _error.pubError(topic, e); 
 				});
 			}
-		}
+		};
 	},
 
 	// notify all objects subscribed to the given topic with the data received
@@ -136,10 +138,10 @@
 	// 'scope' is a custom scope, defaults to 'this'
 	_subscribe = function(topic, toCall, scope) {
 		
-		var scope = scope? scope : this,
+		scope = scope? scope : this;
 
 		// verify that param #1 & #3 are of type String
-		areString = _assert.is(topic, 'String'),
+		var areString = _assert.is(topic, 'String'),
 
 		// scope should be of type Object
 		isObject = _assert.is(scope, 'Object');
@@ -183,7 +185,7 @@
 						if(topicLine[index].oId === oId) {
 							topicLine.splice(index, 1);
 							return;
-						};
+						}
 					}
 				}
 			});
