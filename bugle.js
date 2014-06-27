@@ -35,7 +35,7 @@
 			}
 
 			this._super.apply(this, arguments);
-			this._init.apply(this, arguments);
+			this._constructor.apply(this, arguments);
 		};
 
 
@@ -53,8 +53,8 @@
 		}
 
 		// when no init found, assume an empty constructor
-		if(!Builder.prototype._init) {
-			Builder.prototype._init = function() { };
+		if(!Builder.prototype._constructor) {
+			Builder.prototype._constructor = function() { };
 		}
 
 		return Builder;
@@ -200,7 +200,6 @@
 
 		//removes the need for 'new' keyword
 		if(!(this instanceof Bugle)) {
-
 			return new Bugle();
 		}
 
@@ -220,22 +219,22 @@
 		unsub: _unsubscribe
 	};
 
-	window.Bugle = function(methods) {
+	window.Bugle = {
 
-		// check for option arg
-		if(arguments.length) {
+		'extend': function(methods) {
+			// check for option arg
+			if(methods) {
 
-			// verify methods is of type Object
-			if(_assert.is(methods, 'Object')) {
-				return _extend(methods, Bugle);
+				// verify methods is of type Object
+				if(_assert.is(methods, 'Object')) {
+					return _extend(methods, Bugle);
 
-			} else {
+				} else {
 
-				throw _error.notAnObject();
+					throw _error.notAnObject();
+				}
 			}
 		}
-
-		return Bugle();
-	};
+	}
 
 } )();

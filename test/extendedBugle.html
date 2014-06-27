@@ -72,9 +72,9 @@
 
 		// we can extended an object with custom properties
 		// NOTE: init must be defined if we want custom state
-		var ExtenedBugle = Bugle({
+		var ExtenedBugle = Bugle.extend({
 			
-			'_init': function(array) {
+			'_constructor': function(array) {
 				this.state = array;
 			},
 
@@ -88,16 +88,21 @@
 		}),
 
 		// init ExtendedBugle with empty array
-		// NOTE: calls 'init' method
+		// NOTE: calls '_constructor' method
 		extendedBugle = ExtenedBugle([]),
 
 		// instantiate our environment object
 		environment1 = new Environment1([]),
 		environment2 = new Environment2([1,2,3]);
 
-
+		// model subscribers
 		extendedBugle.sub('cause', environment1.store, environment1);
 		extendedBugle.sub('cause', environment2.append, environment2);
+		
+		// anom subscriber
+		extendedBugle.sub('cause', function(data) {
+			console.log('anom cause', data);
+		});
 
 		extendedBugle.input([1,2,3,4]);
 
@@ -143,12 +148,13 @@
 			}
 		);
 
-		// verify that two objects are added to 'cause' topic on 'extendedBugle'
+		// verify that three objects are added to 'cause' topic on 'extendedBugle'
 		when(
 			function() {
-				return extendedBugle.topics['cause'].length === 2;
+				return extendedBugle.topics['cause'].length === 3;
 			},
 			function() {
+				console.log('three subscribers in \'cause\'');
 				console.log(extendedBugle.topics['cause']);
 			}
 		)
