@@ -193,7 +193,7 @@
 
 	function Bugle() {
 
-		// if no 'new' keyword specified by user
+		//removes the need for 'new' keyword
 		if(!(this instanceof Bugle)) {
 
 			return new Bugle();
@@ -201,7 +201,7 @@
 
 		// holds each topic along with its subscribers
 		this.topics = [];
-		
+
 		// tracks the location of an object instance on a topic
 		this.oId = 0;
 	}
