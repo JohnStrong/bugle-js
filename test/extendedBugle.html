@@ -96,8 +96,8 @@
 		environment2 = new Environment2([1,2,3]);
 
 
-		extendedBugle.sub('cause', environment1, 'store');
-		extendedBugle.sub('cause', environment2, 'append');
+		extendedBugle.sub('cause', environment1.store, environment1);
+		extendedBugle.sub('cause', environment2.append, environment2);
 
 		extendedBugle.input([1,2,3,4]);
 

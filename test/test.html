@@ -36,7 +36,7 @@
 			
 			'literal': {
 				'state': [1,2,3,4],
-				'update': function(data, topic) {
+				'update': function(data) {
 					this.state = this.state.concat(data);
 				}
 			},
@@ -96,8 +96,8 @@
 
 		// sub myObj to 'joins' topic
 		// use the update property function when data is published to the topic
-		var oid1 = bugle1.sub('joins', literalObj, 'update'),
-		oid2 = bugle1.sub('joins', instanceObj, 'execute');
+		var oid1 = bugle1.sub('joins', literalObj.update, literalObj),
+		oid2 = bugle1.sub('joins', instanceObj.execute, instanceObj);
 
 		// see the state of our pub/sub object
 		console.log('subscribing to topic...');

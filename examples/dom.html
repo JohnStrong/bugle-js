@@ -33,7 +33,7 @@
 
 				// subscribe this object instance to the 'add' topic
 				// call 'addItem' when data is published to the topic
-				this.sub('add', this, 'addItem');
+				this.sub('add', this.addItem);
 			},
 				
 			'items': [

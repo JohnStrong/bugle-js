@@ -80,7 +80,7 @@
 		},
 
 		'pubError': function(topic, error) {
-			return 'Failed to publish to instance on topic "' + 
+			return 'Failed to publish to obj on topic "' + 
 				topic + '" [' + error.message + ']';
 		},
 
@@ -93,10 +93,10 @@
 	_publishTo = function(topic, data) {
 
 		return function(subscriber) {
-				
+
 			try {
 				subscriber
-					.fn.apply(subscriber.instance, data.concat(topic));
+					.fn.apply(subscriber.obj, data.concat(topic));
 
 			} catch(e) {
 
@@ -132,14 +132,17 @@
 		}
 	},
 
-	// subscribe an object instance to a topic, execute with the 'toCall' function
-	_subscribe = function(topic, instance, toCall) {
+	// subscribe a function to a topic
+	// 'scope' is a custom scope, defaults to 'this'
+	_subscribe = function(topic, toCall, scope) {
 		
-		// verify that param #1 & #3 are of type String
-		var areString = _assert.areAll([topic, toCall], 'String'),
+		var scope = scope? scope : this,
 
-		// instance should be of type Object
-		isObject = _assert.is(instance, 'Object');
+		// verify that param #1 & #3 are of type String
+		areString = _assert.is(topic, 'String'),
+
+		// scope should be of type Object
+		isObject = _assert.is(scope, 'Object');
 
 		if(areString && isObject) {
 		
@@ -149,8 +152,8 @@
 
 			this.topics[topic].push({
 				'oId': (++this.oId),
-				'instance': instance,
-				'fn': instance[toCall]
+				'obj': scope,
+				'fn': toCall
 			});
 
 			return this.oId;
@@ -202,7 +205,7 @@
 		// holds each topic along with its subscribers
 		this.topics = [];
 
-		// tracks the location of an object instance on a topic
+		// tracks the location of an object obj on a topic
 		this.oId = 0;
 	}
 
