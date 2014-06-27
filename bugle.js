@@ -60,7 +60,7 @@
 		return Builder;
 	},
 
-	// ensures the we get 'true' sync behaviour 
+	// ensures the we get 'true' sync behavior 
 	_async = function(fn) {
 		setTimeout(fn, 0);
 	},
@@ -225,7 +225,7 @@
 		// check for option arg
 		if(arguments.length) {
 
-			// verify stateful & of type Object
+			// verify methods is of type Object
 			if(_assert.is(methods, 'Object')) {
 				return _extend(methods, Bugle);
 
