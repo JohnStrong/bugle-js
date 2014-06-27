@@ -222,8 +222,9 @@
 	window.Bugle = {
 
 		'extend': function(methods) {
+
 			// check for option arg
-			if(methods) {
+			if(methods && Object.keys(methods).length) {
 
 				// verify methods is of type Object
 				if(_assert.is(methods, 'Object')) {
