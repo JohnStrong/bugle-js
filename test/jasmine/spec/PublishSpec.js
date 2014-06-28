@@ -68,7 +68,7 @@ describe('publish', function() {
 		// build 100 pubTest, subscribe each
 		var testNum = 1;
 
-		build(100, pubTest).map(function(obj) {
+		build(100, pubTest).forEach(function(obj) {
 			bugle.sub(TEST_NAMESPACE, obj.handler, obj);
 		});
 
