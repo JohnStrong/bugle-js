@@ -24,16 +24,17 @@ describe('subscribe suite', function() {
 	// pipe each function of an array to a 'handler' function
 	pipe = function(actions) {
 
-		var len = actions.length;
-
-		return function(fn) {
+		return function(topic) {
 
 			// take arguments and pass to our pipe handler
-			var others = Array.prototype.slice.call(arguments, 1);
+			var rem = Array.prototype.slice.call(arguments, 1),
 
-			for(var ith = 0; ith < len; ith++) {
-				fn.apply(fn, [actions[ith]].concat(others));
-			}
+			res = actions.map(function(action) {
+				return action.apply(action, [topic].concat(rem));
+			});
+
+			// return piped result
+			return res;
 		};
 	},
 
@@ -119,6 +120,11 @@ describe('subscribe suite', function() {
 
 	});
 
+	it('returns an reference id (oId) for each new subscription', function() {
+		var oId = bugle.sub('oId', function() { });
+		expect(type(oId)).toBe('Number');
+	});
+
 	it('can have multiple subscriptions to a topic', function() {
 		
 		/** SETUP **/
@@ -129,9 +135,12 @@ describe('subscribe suite', function() {
 		TOPIC_NAMESPACE = 'multiples';
 
 		// subscribes each test function to 'multiples' topic
-		fns = pipe(build(SAMPLE_LENGTH, function() {}));
-		fns(function(testFn) { bugle.sub(TOPIC_NAMESPACE, testFn); });
+		var fns = build(SAMPLE_LENGTH, function() {}),
+		oIds = fns.map(function(testFn) { 
+			return bugle.sub(TOPIC_NAMESPACE, testFn); 
+		});
 
+		// get length of the topic & take a subset for testing
 		var multiples = topic(TOPIC_NAMESPACE),
 		len = multiples.len(),
 		sample = multiples.take(SUBSET_LENGTH);
@@ -141,13 +150,13 @@ describe('subscribe suite', function() {
 		expect(len).toBe(SAMPLE_LENGTH);
 
 		for(var ith = 0; ith < SUBSET_LENGTH; ith++) {
+
+			// oId in 'sample' should equal its corresponding value in 'oIds'
+			expect(sample[ith].oId).toBe(oIds[ith]);
+
+			// each 'sample' member should contain a valid function
 			expect(type(sample[ith].fn)).toBe('Function');
 		}
-	});
-
-	it('returns an object id (number) for each new subscription', function() {
-		var oId = bugle.sub('oId', function() { });
-		expect(type(oId)).toBe('Number');
 	});
 
 });
