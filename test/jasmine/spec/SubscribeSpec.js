@@ -1,6 +1,8 @@
 
 describe('subscribe', function() {
 
+	'use strict';
+
 	var bugle,
 
 	// returns the REAL type of some value
@@ -47,13 +49,14 @@ describe('subscribe', function() {
 			},
 
 			'listen': function() {
-				this.sub('values', this.update)
+				this.sub('values', this.update);
 			},
 
 			'update': function(a, b) {
 				this.a = a;
 				this.b = b;
 			}
+
 		})(1,2);
 	});
 
@@ -144,7 +147,7 @@ describe('subscribe', function() {
 
 	it("can unsubscribe an member from a topic with a valid oId", function() {
 
-		var TOPIC_NAMESPACE = 'unsub';
+		var TOPIC_NAMESPACE = 'unsub',
 
 		oId = bugle.sub(TOPIC_NAMESPACE, function() {});
 

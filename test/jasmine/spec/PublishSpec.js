@@ -1,13 +1,21 @@
 
 describe('publish', function() {
 
+	'use strict';
+
 	// consts
 	var TEST_NAMESPACE = 'pubTest',
 	SOME_NAMESPACE = '~pubTest',
 
 	// test state
-	bugle, pubTest, testArr = [1,2,3];
+	bugle, pubTest,
 		
+
+	sum = function(arr) {
+		return arr.reduce(function(prev, curr) {
+			return prev + curr;
+		});
+	},
 
 	// build n number of Any type
 	// returns as Array
@@ -38,7 +46,7 @@ describe('publish', function() {
 			state: [],
 
 			handler: function(data) { 
-				this.state = data; 
+				this.state = this.state.concat(data); 
 			}
 		};
 	});
@@ -58,25 +66,29 @@ describe('publish', function() {
 		spyOn(pubTest, 'handler').and.callThrough();
 
 		// build 100 pubTest, subscribe each
-		var subs = build(100, pubTest).map(function(obj) {
+		var testNum = 1;
+
+		build(100, pubTest).map(function(obj) {
 			bugle.sub(TEST_NAMESPACE, obj.handler, obj);
 		});
 
 		expect(bugle.topics[TEST_NAMESPACE].length).toBe(100);
 
 		// publish to the topic namespace
-		bugle.pub(TEST_NAMESPACE, testArr);
+		bugle.pub(TEST_NAMESPACE, testNum);
 
 		jasmine.clock().tick(10);
 
 		// last arg to sub is ALWAYS the topic name...
-		expect(pubTest.handler).toHaveBeenCalledWith(testArr, TEST_NAMESPACE);
-		expect(pubTest.state).toEqual(testArr);
+		expect(pubTest.handler).toHaveBeenCalledWith(testNum, TEST_NAMESPACE);
+		expect(sum(pubTest.state)).toEqual(100);
 	});
 
 	it('ONLY forwards data to subscribers on the specified topic', function() {
 
-		var testInstances = build(100, pubTest),
+		var testArr = [1,2,3],
+
+		testInstances = build(100, pubTest),
 		used = testInstances.splice(0, 50),
 
 		// to be ignored test object
@@ -87,12 +99,12 @@ describe('publish', function() {
 		spyOn(pubTest, 'handler');
 		spyOn(ignoreTest, 'handler');
 		
-		these = used.map(function(obj) {
+	 	used.forEach(function(obj) {
 			bugle.sub(TEST_NAMESPACE, obj.handler, obj);
-		}),
+		});
 
-		those = testInstances.map(function(obj) {
-			bugle.sub(SOME_NAMESPACE, ignoreTest.handler, ignoreTest);
+		testInstances.forEach(function(obj) {
+			bugle.sub(SOME_NAMESPACE, obj.handler, obj);
 		});
 
 		// publish to 'pubTest'
