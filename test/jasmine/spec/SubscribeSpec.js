@@ -22,6 +22,7 @@ describe('subscribe', function() {
 	},
 
 	// pipe each function of an array to a 'handler' function
+	/*
 	pipe = function(actions) {
 
 		return function(topic) {
@@ -37,6 +38,7 @@ describe('subscribe', function() {
 			return res;
 		};
 	},
+	*/
 
 	topic = function(namespace) {
 		

@@ -128,6 +128,8 @@
 				}
 			});
 
+			return true;
+
 		} else {
 
 			throw _error.pub();
@@ -184,11 +186,13 @@
 
 						if(topicLine[index].oId === oId) {
 							topicLine.splice(index, 1);
-							return;
+							break;
 						}
 					}
 				}
 			});
+
+			return true;
 
 		} else {
 
