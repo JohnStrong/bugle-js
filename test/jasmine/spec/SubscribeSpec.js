@@ -159,4 +159,25 @@ describe('subscribe', function() {
 		}
 	});
 
+	it("can unsubscribe an member from a topic with a valid oId", function() {
+
+		var TOPIC_NAMESPACE = 'unsub';
+
+		oId = bugle.sub(TOPIC_NAMESPACE, function() {});
+
+		jasmine.clock().install();
+
+		bugle.unsub(TOPIC_NAMESPACE, oId);
+
+		// oId should not be unsubscribed yet (event is asynchronous)
+		expect(bugle.topics[TOPIC_NAMESPACE].length).not.toBe(0);
+
+		jasmine.clock().tick(10);
+
+		// expect oId to now be unsubscribed
+		expect(bugle.topics[TOPIC_NAMESPACE].length).toBe(0);
+
+		jasmine.clock().uninstall();
+	});
+
 });
