@@ -123,8 +123,10 @@
 				
 				if(self.topics[topic]) {
 
-					var topicLine = self.topics[topic];
-					topicLine.forEach(_publishTo(topic, args));
+					var subscribers = self.topics[topic],
+					template = _publishTo(topic, args);
+
+					subscribers.forEach(template);
 				}
 			});
 
@@ -177,15 +179,16 @@
 
 			_async(function() {
 
-				var topicLine = self.topics[topic];
+				var subscribers = self.topics[topic],
+				len = subscribers.length;
 				
-				if(topicLine) {
+				if(subscribers) {
 				
 					// loop for specified oId until we get a match
-					for(var index in topicLine) {
+					for(var ith = 0; ith < len; ith++) {
 
-						if(topicLine[index].oId === oId) {
-							topicLine.splice(index, 1);
+						if(subscribers[ith].oId === oId) {
+							subscribers.splice(ith, 1);
 							break;
 						}
 					}
