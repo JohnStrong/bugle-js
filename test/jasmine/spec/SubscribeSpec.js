@@ -8,37 +8,18 @@ describe('subscribe', function() {
 		return Object.prototype.toString.call(val).slice(8, -1);
 	},
 
-	// build n number of functions
-	// returns array of created functions
-	build = function(n, fn) {
+	// build n number of Any type
+	// returns as Array
+	build = function(n, topic) {
 		var arr = [];
 
 		while(n) {
-			arr.push(fn);
+			arr.push(topic);
 			n--;
 		}
 
 		return arr;
 	},
-
-	// pipe each function of an array to a 'handler' function
-	/*
-	pipe = function(actions) {
-
-		return function(topic) {
-
-			// take arguments and pass to our pipe handler
-			var rem = Array.prototype.slice.call(arguments, 1),
-
-			res = actions.map(function(action) {
-				return action.apply(action, [topic].concat(rem));
-			});
-
-			// return piped result
-			return res;
-		};
-	},
-	*/
 
 	topic = function(namespace) {
 		
