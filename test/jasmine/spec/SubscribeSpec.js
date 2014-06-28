@@ -18,16 +18,24 @@ describe('subscribe suite', function() {
 		return arr;
 	},
 
-	subAll = function(topic, arr) {
+	pipe = function(actions) {
 
-		while(arr.length) {
-			bugle.sub(topic, arr.shift());
-		}
+		var len = actions.length;
+
+		return function(fn) {
+
+			// take arguments and pass to our pipe handler
+			var others = Array.prototype.slice.call(arguments, 1);
+
+			for(var ith = 0; ith < len; ith++) {
+				fn.apply(fn, [actions[ith]].concat(others));
+			}
+		};
 	},
 
-	topic = function(topic) {
+	topic = function(namespace) {
 		
-		topic = bugle.topics[topic];
+		var topic = bugle.topics[namespace];
 
 		return {
 			
@@ -81,7 +89,7 @@ describe('subscribe suite', function() {
 
 	it("can subscribe a named function to a topic", function() {
 		
-		function namedTest() { };
+		function namedTest() {};
 
 		bugle.sub('named', namedTest);
 
@@ -109,27 +117,31 @@ describe('subscribe suite', function() {
 
 	it('can have multiple subscriptions to a topic', function() {
 		
+		/** SETUP **/
+
 		var SAMPLE_LENGTH = 100,
 		SUBSET_LENGTH = 50,
 
-		functionsArr = build(SAMPLE_LENGTH, function() { });
+		TOPIC_NAMESPACE = 'multiples';
 
-		subAll('multiples', functionsArr);
+		// subscribes each test function to 'multiples' topic
+		fns = pipe(build(SAMPLE_LENGTH, function() {}));
+		fns(function(testFn) { bugle.sub(TOPIC_NAMESPACE, testFn); });
 
-		var multiples = topic('multiples'),
+		var multiples = topic(TOPIC_NAMESPACE),
 		len = multiples.len(),
 		sample = multiples.take(SUBSET_LENGTH);
+
+		/** TEST(s) **/
 
 		expect(len).toBe(SAMPLE_LENGTH);
 
 		for(var ith = 0; ith < SUBSET_LENGTH; ith++) {
-
 			expect(type(sample[ith].fn)).toBe('Function');
 		}
 	});
 
 	it('returns an object id (number) for each new subscription', function() {
-		
 		var oId = bugle.sub('oId', function() { });
 		expect(type(oId)).toBe('Number');
 	});

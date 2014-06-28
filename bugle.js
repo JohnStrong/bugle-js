@@ -135,7 +135,7 @@
 	},
 
 	// subscribe a function to a topic
-	// 'scope' is a custom scope, defaults to 'this'
+	// with a given scope (defaults to current Bugle instance)
 	_subscribe = function(topic, toCall, scope) {
 		
 		scope = scope? scope : this;
