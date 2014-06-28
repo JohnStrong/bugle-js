@@ -18,14 +18,14 @@ describe('subscribe suite', function() {
 		return arr;
 	},
 
-	subAll = function(bugle, topic, arr) {
+	subAll = function(topic, arr) {
 
 		while(arr.length) {
 			bugle.sub(topic, arr.shift());
 		}
 	},
 
-	topic = function(bugle, topic) {
+	topic = function(topic) {
 		
 		topic = bugle.topics[topic];
 
@@ -71,14 +71,26 @@ describe('subscribe suite', function() {
 
 		bugle.sub('values', function() { });
 
-		var values = topic(bugle, 'values'),
+		var values = topic('values'),
 		topicLen = values.len(),
-		sample = values.take(1)[0];
+		sub = values.take(1)[0];
 
 		expect(topicLen).toBe(1);
+		expect(type(sub.fn)).toBe('Function');
+	});
 
-		expect(sample.fn).toBeDefined();
-		expect(type(sample.fn)).toBe('Function');
+	it("can subscribe a named function to a topic", function() {
+		
+		function namedTest() { };
+
+		bugle.sub('named', namedTest);
+
+		var named = topic('named'),
+		len = named.len(),
+		sub = named.take(1)[0];
+
+		expect(len).toBe(1);
+		expect(type(sub.fn)).toBe('Function');
 	});
 
 	it("can subscribe an object method to a topic", function() {
@@ -86,14 +98,12 @@ describe('subscribe suite', function() {
 		// subscribe bugle to 'values' topic
 		bugle.listen();
 
-		var values = topic(bugle, 'values'),
+		var values = topic('values'),
 		topicLen = values.len(),
-		sample = values.take(1)[0];
+		sub = values.take(1)[0];
 
 		expect(topicLen).toBe(1);
-
-		expect(sample.fn).toBeDefined();
-		expect(type(sample.fn)).toBe('Function');
+		expect(type(sub.fn)).toBe('Function');
 
 	});
 
@@ -104,9 +114,9 @@ describe('subscribe suite', function() {
 
 		functionsArr = build(SAMPLE_LENGTH, function() { });
 
-		subAll(bugle, 'multiples', functionsArr);
+		subAll('multiples', functionsArr);
 
-		var multiples = topic(bugle, 'multiples'),
+		var multiples = topic('multiples'),
 		len = multiples.len(),
 		sample = multiples.take(SUBSET_LENGTH);
 
@@ -114,9 +124,14 @@ describe('subscribe suite', function() {
 
 		for(var ith = 0; ith < SUBSET_LENGTH; ith++) {
 
-			expect(sample[ith].fn).toBeDefined();
 			expect(type(sample[ith].fn)).toBe('Function');
 		}
+	});
+
+	it('returns an object id (number) for each new subscription', function() {
+		
+		var oId = bugle.sub('oId', function() { });
+		expect(type(oId)).toBe('Number');
 	});
 
 });
