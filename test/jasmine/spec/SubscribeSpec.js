@@ -1,5 +1,5 @@
 
-describe('subscribe suite', function() {
+describe('subscribe', function() {
 
 	var bugle,
 

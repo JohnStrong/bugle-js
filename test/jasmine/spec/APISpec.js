@@ -1,5 +1,5 @@
 
-describe('api suite', function() {
+describe('api', function() {
 
 	var bugle,
 
