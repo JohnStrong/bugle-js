@@ -3,10 +3,13 @@ describe('subscribe suite', function() {
 
 	var bugle,
 
+	// returns the REAL type of some value
 	type = function(val) {
 		return Object.prototype.toString.call(val).slice(8, -1);
 	},
 
+	// build n number of functions
+	// returns array of created functions
 	build = function(n, fn) {
 		var arr = [];
 
@@ -18,6 +21,7 @@ describe('subscribe suite', function() {
 		return arr;
 	},
 
+	// pipe each function of an array to a 'handler' function
 	pipe = function(actions) {
 
 		var len = actions.length;
