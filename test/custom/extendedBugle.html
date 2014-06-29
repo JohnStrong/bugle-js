@@ -79,7 +79,7 @@
 			},
 
 			'input': function(data) {
-				this.pub(null, data);
+				this.pub('cause', data);
 			},
 
 			'update': function(data1, data2) {
@@ -106,7 +106,7 @@
 
 		extendedBugle.input([1,2,3,4]);
 
-		//var status = extendedBugle.unsub('cause', oId);
+		//var status = extendedBugle.unsub('cause');
 
 		/************************
 		 *

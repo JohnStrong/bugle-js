@@ -145,12 +145,12 @@
 		scope = scope? scope : this;
 
 		// verify that param #1 & #3 are of type String
-		var areString = _assert.is(topic, 'String'),
+		var isTopicString = _assert.is(topic, 'String'),
 
 		// scope should be of type Object
-		isObject = _assert.is(scope, 'Object');
+		isScopeObject = _assert.is(scope, 'Object');
 
-		if(areString && isObject) {
+		if(isTopicString && isScopeObject) {
 		
 			if(!this.topics[topic]) {
 				this.topics[topic] = [];
@@ -175,12 +175,16 @@
 
 		var self = this,
 
-		subscribers = self.topics[topic],
-		len = subscribers.length;
+		isTopicString = _assert.is(topic, 'String'),
+		isOidNumber = _assert.is(oId, 'Number');
 				
-		if(_assert.is(topic, 'String')) {
+		if(isTopicString && isOidNumber) {
+
+			var subscribers = self.topics[topic];
 
 			if(subscribers) {
+
+				var len = subscribers.length;
 				
 				_async(function() {
 					

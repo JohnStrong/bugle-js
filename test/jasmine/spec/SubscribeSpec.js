@@ -64,7 +64,7 @@ describe('subscribe', function() {
 		})(1,2);
 	});
 
-	it("should start with an empty state", function() {
+	it('should start with an empty state', function() {
 
 		expect(bugle.oId).toBe(0);
 		expect(bugle.topics).toEqual([]);
@@ -80,7 +80,7 @@ describe('subscribe', function() {
 		}
 	});
 
-	it("can subscribe an anonymous function to a topic", function() {
+	it('can subscribe an anonymous function to a topic', function() {
 
 		bugle.sub(TEST_NAMESPACE, function() { });
 
@@ -92,7 +92,7 @@ describe('subscribe', function() {
 		expect(type(sub.fn)).toBe('Function');
 	});
 
-	it("can subscribe a named function to a topic", function() {
+	it('can subscribe a named function to a topic', function() {
 		
 		function namedTest() {};
 
@@ -106,7 +106,7 @@ describe('subscribe', function() {
 		expect(type(sub.fn)).toBe('Function');
 	});
 
-	it("can subscribe an object method to a topic", function() {
+	it('can subscribe an object method to a topic', function() {
 
 		// subscribe bugle to 'values' topic
 		bugle.listen();
@@ -120,7 +120,7 @@ describe('subscribe', function() {
 
 	});
 
-	it('returns an reference id (oId) for each new subscription', function() {
+	it('returns a reference id (oId) for each new subscription', function() {
 		var oId = bugle.sub('oId', function() { });
 		expect(type(oId)).toBe('Number');
 	});
@@ -155,26 +155,4 @@ describe('subscribe', function() {
 			expect(type(sample[ith].fn)).toBe('Function');
 		}
 	});
-
-	it("can unsubscribe an member from a topic with a valid oId", function() {
-
-		var oId = bugle.sub(TEST_NAMESPACE, function() {});
-
-		jasmine.clock().install();
-
-		var status = bugle.unsub(TEST_NAMESPACE, oId);
-
-		expect(status).toBe(true);
-		
-		// oId should not be unsubscribed yet (event is asynchronous)
-		expect(bugle.topics[TEST_NAMESPACE].length).not.toBe(0);
-
-		jasmine.clock().tick(10);
-
-		// expect oId to now be unsubscribed
-		expect(bugle.topics[TEST_NAMESPACE].length).toBe(0);
-
-		jasmine.clock().uninstall();
-	});
-
 });
