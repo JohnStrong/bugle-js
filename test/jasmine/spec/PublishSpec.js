@@ -7,13 +7,18 @@ describe('publish', function() {
 	var TEST_NAMESPACE = 'pubTest',
 	SOME_NAMESPACE = '~pubTest',
 
+	ASYNC_WAIT = 10,
+
 	BUILD_QTY = 100,
 
 	PUB_ERROR_MSG = 'UASGE [ topic:String, data:Array[Any...] ]',
 
 	// test state
 	bugle, pubTest,
-		
+
+	tick = function() {
+		jasmine.clock().tick(ASYNC_WAIT);
+	},	
 
 	sum = function(arr) {
 		return arr.reduce(function(prev, curr) {
@@ -62,7 +67,7 @@ describe('publish', function() {
 		expect(bugle.pub(TEST_NAMESPACE, [])).toBe(true);
 	});
 
-	it('expects a string topic namespace as the 1st parameter', function() {
+	it('throws error if topic param is NOT type String', function() {
 		
 		expect(bugle.pub(TEST_NAMESPACE, [])).toBe(true);
 		
@@ -72,6 +77,28 @@ describe('publish', function() {
 		} catch(e) {
 			expect(e).toBe(PUB_ERROR_MSG);
 		}
+	});
+
+	it('is completely asynchronous', function() {
+		
+		var syncStr = 'sync', asyncStr = 'async';
+
+		spyOn(pubTest, 'handler').and.callFake(function(str) {
+			syncStr = str;
+		});
+
+		bugle.sub(TEST_NAMESPACE, pubTest.handler, pubTest);
+		bugle.pub(TEST_NAMESPACE, asyncStr);
+		
+		expect(pubTest.handler).not.toHaveBeenCalled();
+		expect(syncStr).not.toEqual(asyncStr);
+		
+		// make test wait
+		tick();
+
+		expect(pubTest.handler).toHaveBeenCalled();
+		expect(syncStr).toEqual(asyncStr);
+		
 	});
 
 	it('forwards data to each subscriber on a topic', function() {
@@ -92,7 +119,7 @@ describe('publish', function() {
 		// publish to the topic namespace
 		bugle.pub(TEST_NAMESPACE, testNum);
 
-		jasmine.clock().tick(10);
+		tick();
 
 		// last arg to sub is ALWAYS the topic name...
 		expect(pubTest.handler).toHaveBeenCalledWith(testNum, TEST_NAMESPACE);
@@ -124,11 +151,24 @@ describe('publish', function() {
 
 		// publish to 'pubTest'
 		bugle.pub(TEST_NAMESPACE, testArr);
-
-		jasmine.clock().tick(10);
+		
+		tick();
 
 		expect(pubTest.handler).toHaveBeenCalled();
 		expect(ignoreTest.handler).not.toHaveBeenCalled();
+	});
+
+	it('will call subscriber with lone topic name if no data sent on publish', function() {
+
+		var topicName,
+		toCall = function(topic) { topicName = topic; };
+
+		bugle.sub(TEST_NAMESPACE, toCall);
+		bugle.pub(TEST_NAMESPACE);
+
+		tick();
+
+		expect(topicName).toBe(TEST_NAMESPACE);
 	});
 
 });
