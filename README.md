@@ -15,7 +15,7 @@ At its core, Bugle-js has an event-driven architecture.
 In other words, Bugle-js assists developers in writing non-blocking code (yay!)
 
 Projects that utilize Bugle-js will only react to events <strong>as they happen</strong>.
-This serves to free up a projects main event loop resulting in responsive system with increased scalability.
+This serves to free up a project's main event loop resulting in a responsive system with increased scalability.
 
 ##License
 
