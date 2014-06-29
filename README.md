@@ -12,7 +12,7 @@ Bugle-js has three primary features:
 ##Bugle-js is event-based
 
 At its core, Bugle-js has an event-driven architecture. 
-In other words, Bugle-js allows developers to write non-blocking code (yay!)
+In other words, Bugle-js assists developers in writing non-blocking code (yay!)
 
 Projects that utilize Bugle-js will only react to events <strong>as they happen</strong>.
 This serves to free up a projects main event loop resulting in responsive system with increased scalability.
