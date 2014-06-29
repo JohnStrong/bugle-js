@@ -100,11 +100,10 @@
 		extendedBugle.sub('cause', environment2.append, environment2);
 		
 		// anom subscriber
-		extendedBugle.sub('cause', function(data) {
-			console.log('anom cause', data);
-		});
+		extendedBugle.sub('cause', function(data) { });
 
 		extendedBugle.input([1,2,3,4]);
+		console.log('published....');
 
 		//var status = extendedBugle.unsub('cause');
 

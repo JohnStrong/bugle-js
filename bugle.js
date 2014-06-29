@@ -120,7 +120,7 @@
 
 			// publish args to each subscriber on topic
 			_async(function() {
-				
+
 				if(self.topics[topic]) {
 
 					var subscribers = self.topics[topic],
@@ -183,10 +183,10 @@
 			var subscribers = self.topics[topic];
 
 			if(subscribers) {
-
-				var len = subscribers.length;
 				
 				_async(function() {
+
+					var len = subscribers.length;
 					
 					// loop for specified oId until we get a match
 					for(var ith = 0; ith < len; ith++) {
