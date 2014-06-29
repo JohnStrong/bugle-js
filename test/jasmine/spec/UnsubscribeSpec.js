@@ -1,5 +1,5 @@
 
-describe('unsubscribe suite', function() {
+describe('unsubscribe', function() {
 	
 	'use stirct';
 
