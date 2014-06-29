@@ -173,17 +173,17 @@
 	// remove an object from the subscriptions list on a topic with its assigned oId
 	_unsubscribe = function(topic, oId) {
 
-		var self = this;
-		
+		var self = this,
+
+		subscribers = self.topics[topic],
+		len = subscribers.length;
+				
 		if(_assert.is(topic, 'String')) {
 
-			_async(function() {
-
-				var subscribers = self.topics[topic],
-				len = subscribers.length;
+			if(subscribers) {
 				
-				if(subscribers) {
-				
+				_async(function() {
+					
 					// loop for specified oId until we get a match
 					for(var ith = 0; ith < len; ith++) {
 
@@ -192,10 +192,14 @@
 							break;
 						}
 					}
-				}
-			});
+				});
 
-			return true;
+				return true;
+
+			} else {
+
+				return false;
+			}
 
 		} else {
 
@@ -219,11 +223,11 @@
 
 	Bugle.prototype = {
 		
-		pub: _publish,
+		'pub': _publish,
 
-		sub: _subscribe,
+		'sub': _subscribe,
 
-		unsub: _unsubscribe
+		'unsub': _unsubscribe
 	};
 
 	window.Bugle = {

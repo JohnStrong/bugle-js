@@ -7,6 +7,10 @@ describe('publish', function() {
 	var TEST_NAMESPACE = 'pubTest',
 	SOME_NAMESPACE = '~pubTest',
 
+	BUILD_QTY = 100,
+
+	PUB_ERROR_MSG = 'UASGE [ topic:String, data:Array[Any...] ]',
+
 	// test state
 	bugle, pubTest,
 		
@@ -55,6 +59,18 @@ describe('publish', function() {
 		jasmine.clock().uninstall();
 	});
 
+	it('expects a string topic namespace as the 1st parameter', function() {
+		
+		expect(bugle.pub(TEST_NAMESPACE, [])).toBe(true);
+		
+		// best i could do right now...
+		try {
+			bugle.pub(null, []);
+		} catch(e) {
+			expect(e).toBe(PUB_ERROR_MSG);
+		}
+	});
+
 	it('will not throw if topic is empty', function() {
 		expect(bugle.pub(TEST_NAMESPACE, [])).toBe(true);
 	});
@@ -68,11 +84,11 @@ describe('publish', function() {
 		// build 100 pubTest, subscribe each
 		var testNum = 1;
 
-		build(100, pubTest).forEach(function(obj) {
+		build(BUILD_QTY, pubTest).forEach(function(obj) {
 			bugle.sub(TEST_NAMESPACE, obj.handler, obj);
 		});
 
-		expect(bugle.topics[TEST_NAMESPACE].length).toBe(100);
+		expect(bugle.topics[TEST_NAMESPACE].length).toBe(BUILD_QTY);
 
 		// publish to the topic namespace
 		bugle.pub(TEST_NAMESPACE, testNum);
@@ -81,14 +97,14 @@ describe('publish', function() {
 
 		// last arg to sub is ALWAYS the topic name...
 		expect(pubTest.handler).toHaveBeenCalledWith(testNum, TEST_NAMESPACE);
-		expect(sum(pubTest.state)).toEqual(100);
+		expect(sum(pubTest.state)).toEqual(BUILD_QTY);
 	});
 
 	it('ONLY forwards data to subscribers on the specified topic', function() {
 
 		var testArr = [1,2,3],
 
-		testInstances = build(100, pubTest),
+		testInstances = build(BUILD_QTY, pubTest),
 		used = testInstances.splice(0, 50),
 
 		// to be ignored test object

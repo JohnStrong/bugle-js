@@ -1,1 +1,4 @@
 test/jasmine/lib
+.travis.yml
+Gruntfile.js
+node_modules

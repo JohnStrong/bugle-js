@@ -3,7 +3,11 @@ describe('subscribe', function() {
 
 	'use strict';
 
-	var bugle,
+	var TEST_NAMESPACE = 'subTest',
+
+	SUB_ERROR_MSG = 'USAGE [ topic:String, object:Object, toCall:String ]',
+
+	bugle,
 
 	// returns the REAL type of some value
 	type = function(val) {
@@ -49,7 +53,7 @@ describe('subscribe', function() {
 			},
 
 			'listen': function() {
-				this.sub('values', this.update);
+				this.sub(TEST_NAMESPACE, this.update);
 			},
 
 			'update': function(a, b) {
@@ -66,11 +70,21 @@ describe('subscribe', function() {
 		expect(bugle.topics).toEqual([]);
 	});
 
+	it('expects a string topic namespace as its 1st parameter', function() {
+		expect(bugle.sub(TEST_NAMESPACE, function() {})).toBeTruthy();
+
+		try {
+			bugle.sub(null, function() {});
+		} catch(e) {
+			expect(e).toBe(SUB_ERROR_MSG);
+		}
+	});
+
 	it("can subscribe an anonymous function to a topic", function() {
 
-		bugle.sub('values', function() { });
+		bugle.sub(TEST_NAMESPACE, function() { });
 
-		var values = topic('values'),
+		var values = topic(TEST_NAMESPACE),
 		topicLen = values.len(),
 		sub = values.take(1)[0];
 
@@ -82,9 +96,9 @@ describe('subscribe', function() {
 		
 		function namedTest() {};
 
-		bugle.sub('named', namedTest);
+		bugle.sub(TEST_NAMESPACE, namedTest);
 
-		var named = topic('named'),
+		var named = topic(TEST_NAMESPACE),
 		len = named.len(),
 		sub = named.take(1)[0];
 
@@ -97,7 +111,7 @@ describe('subscribe', function() {
 		// subscribe bugle to 'values' topic
 		bugle.listen();
 
-		var values = topic('values'),
+		var values = topic(TEST_NAMESPACE),
 		topicLen = values.len(),
 		sub = values.take(1)[0];
 
@@ -114,20 +128,17 @@ describe('subscribe', function() {
 	it('can have multiple subscriptions to a topic', function() {
 		
 		/** SETUP **/
-
 		var SAMPLE_LENGTH = 100,
 		SUBSET_LENGTH = 50,
 
-		TOPIC_NAMESPACE = 'multiples';
-
 		// subscribes each test function to 'multiples' topic
-		var fns = build(SAMPLE_LENGTH, function() {}),
+		fns = build(SAMPLE_LENGTH, function() {}),
 		oIds = fns.map(function(testFn) { 
-			return bugle.sub(TOPIC_NAMESPACE, testFn); 
+			return bugle.sub(TEST_NAMESPACE, testFn); 
 		});
 
 		// get length of the topic & take a subset for testing
-		var multiples = topic(TOPIC_NAMESPACE),
+		var multiples = topic(TEST_NAMESPACE),
 		len = multiples.len(),
 		sample = multiples.take(SUBSET_LENGTH);
 
@@ -147,21 +158,21 @@ describe('subscribe', function() {
 
 	it("can unsubscribe an member from a topic with a valid oId", function() {
 
-		var TOPIC_NAMESPACE = 'unsub',
-
-		oId = bugle.sub(TOPIC_NAMESPACE, function() {});
+		var oId = bugle.sub(TEST_NAMESPACE, function() {});
 
 		jasmine.clock().install();
 
-		bugle.unsub(TOPIC_NAMESPACE, oId);
+		var status = bugle.unsub(TEST_NAMESPACE, oId);
 
+		expect(status).toBe(true);
+		
 		// oId should not be unsubscribed yet (event is asynchronous)
-		expect(bugle.topics[TOPIC_NAMESPACE].length).not.toBe(0);
+		expect(bugle.topics[TEST_NAMESPACE].length).not.toBe(0);
 
 		jasmine.clock().tick(10);
 
 		// expect oId to now be unsubscribed
-		expect(bugle.topics[TOPIC_NAMESPACE].length).toBe(0);
+		expect(bugle.topics[TEST_NAMESPACE].length).toBe(0);
 
 		jasmine.clock().uninstall();
 	});

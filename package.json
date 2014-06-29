@@ -1,0 +1,15 @@
+{
+	"name": "bugle-js",
+	"description": "simple publish & subscribe javascript project",
+	"version": "0.1.0",
+	"author": {
+		"name": "John Strong",
+		"email": "strngj411@gmail.com"
+	},
+	"scripts": { "test": "grunt test" },
+	"devDependencies": {
+		"grunt": "~0.4.1",
+		"grunt-contrib-jasmine": "~0.4.0"
+	},
+	"license": "MIT"
+}
