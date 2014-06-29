@@ -1,3 +1,21 @@
+##What is Bugle-js?
+
+Bugle-js is a publish-subscribe messaging api for javascript which
+aims to assist javascript developers in building loosely coupled & scalable systems.
+
+Bugle-js has three primary features:
+
+* <strong>publishers</strong>: publish messages to topics 
+* <strong>subscribers</strong>: subscribe to a topic & receive messages published to said topic
+* <strong>topics</strong>: named logical channels where subscribers 'listen' & publishers 'publish'
+
+##Bugle-js is event-based
+
+At its core, Bugle-js has an event-driven architecture. 
+In other words, Bugle-js allows developers to write non-blocking code (yay!)
+
+Projects that utilize Bugle-js will only react to events <strong>as they happen</strong>.
+This serves to free up a projects main event loop resulting in responsive system with increased scalability.
 
 ##License
 
