@@ -26,7 +26,7 @@ To use bugle-js pre-release, you can
 ```bash
 git clone https://github.com/JohnStrong/bugle-js.git
 ```
-Every Bugle-js project should include ``lib/bugle-js``.
+Every Bugle-js project should include a bugle-js source file (located at ``lib/bugle-js``).
 
 ##Test
 
@@ -36,6 +36,58 @@ You can view the current state of Bugle-js by running the jasmine SpecRunner (lo
 This will open a HTML page in your browser, showing the current pass/failure rate of the test suite.
 
 Ensure that jasmine is installed on your machine and referenced correctly in the SpecRunner before running.
+
+##Usage
+To benefit from Bugle-js, first we need to create a 'model'.
+```javascript
+var bugleSkeleton = {
+	'_constructor': function() { }
+}
+```
+Note the ``'_constructor'`` function, this act likes like a traditional constructor often seen in many OOP
+languages (Java, C#). Whatever initial state you give to Bugle will be passed to this function. In this example we are not initializing our object with any state.
+
+Now we have to extend this object with Bugle and execute it.
+```javascript
+var myCustomBugle = Bugle.extend(bugleSkeleton)();
+```
+Next we will subscribe an anonymous function to our bugle instance.
+```javascript
+var objectId = myCustomBugle.sub('demo', function(data) {
+	console.log(data);
+});
+```
+Bugle keeps track of all functions subscribed to topics by generating a unique object id. The object id for our function is returned after calling ``myCustomBugle.sub``. ``'demo'`` is the name of the topic we are subscribing our function to.
+
+When a message is passed to ``'demo'`` our newly subscribed function will be triggered with the message value.
+Lets try this out by publishing some data to our function.
+
+We can publish a message from within our global scope.
+```javascript
+myCustomBugle.pub('demo', [1,2,3,4]);
+```
+This will print ``[1,2,3,4]`` to our console.
+
+Alternatively, we can publish a message from within our extended Bugle object. Lets test this by adding a method to ``bugleSkeleton``.
+
+```javascript
+var bugleSkeleton = {
+	'_constructor': function() { },
+
+	'pubTest': function() {
+		this.pub('demo', 'isnt this fun!?');
+	}
+}
+```
+Now if we call ``myCustomBugle.pubTest()`` our program will print ``'isnt this fun!?'``.
+
+We can unsubscribe our listener function from ``'demo'`` by calling `unsub`, passing it the topic name and a valid object id.
+```javascript
+myCustomBugle.unsub('demo', objectId);
+```
+This will remove our function from the ``'demo'`` topic. Any messages passed to this topic from then on will not trigger our function.
+
+Check out ``examples/`` for more usage examples.
 
 ##License
 

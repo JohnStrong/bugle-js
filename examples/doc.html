@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Bugle-js documentation demo</title>
+	<script src="./../lib/bugle.js"></script>
+</head>
+<body>
+	<script>
+	var bugleSkeleton = {
+		'_constructor': function() { },
+
+		'pubTest': function() {
+			this.pub('demo', 'isnt this fun!?');
+		}
+	};
+
+	var myCustomBugle = Bugle.extend(bugleSkeleton)();
+
+	var objectId = myCustomBugle.sub('demo', function(data) {
+		console.log(data);
+	});
+
+	myCustomBugle.pub('demo', [1,2,3,4]);
+	myCustomBugle.pubTest();
+	
+	myCustomBugle.unsub('demo', objectId);
+	</script>
+</body>
+</html>
