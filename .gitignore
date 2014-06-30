@@ -1,5 +1,5 @@
 test/jasmine/lib
-examples/deom.html
+examples/jquery.min.js
 .travis.yml
 Gruntfile.js
 node_modules

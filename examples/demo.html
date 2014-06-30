@@ -1,0 +1,106 @@
+<!-- NOT FINISHED -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Bugle-js demo</title>
+	<script src="jquery.min.js"></script>
+	<script src="./../lib/bugle.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="search">
+			<input type="text" id="search-bar" placeholder="user">
+		</div>
+		<div class="desc" id="bio">
+		</div>
+	</div>
+	<script type="text/template" id="bio-template">
+		<div>
+		<h1 id="name"></h1>
+		<h3 id="location"></h3>
+		<ul class="info">
+			<li>
+				no. of followers: <span id="followers"></span>
+			</li>
+			<li>
+				no. following: <span id="following"></span>
+			</li>
+		</ul>
+		</div>
+	</script>
+	<script>
+	
+	// our main Bugle model
+	var githubBugle= Bugle.extend({
+
+		'searchElem': null,
+
+		'url': 'https://api.github.com/users/',
+
+		'_constructor': function(id) {
+			
+			var self = this;
+
+			$(id).on('keydown', function(e) {
+
+				if(e.which === 13) {
+					self.search(e.target.value);
+				}
+			});
+		},
+
+		'search': function(usr) {
+
+			var self = this,
+
+			req = new XMLHttpRequest();
+
+			req.onload = function() {
+				self.pub('user', JSON.parse(this.responseText));
+			};
+			
+			req.open('get', this.url + usr, true);
+
+			req.send();
+		}	
+	}),
+
+	// display github user bio
+	bio = {
+		
+		'bioElem': null,
+
+		'init': function(id, search) {
+
+			this.bioElem = $(id);
+
+			search.sub('user', this.display, this);
+		},
+
+		'display': function(userJSON) {
+
+			var temp = $($('#bio-template').html());
+
+			temp.find('#name').html(userJSON.name);
+			temp.find('#location').html(userJSON.location);
+			temp.find('#followers').html(userJSON.followers);
+			temp.find('#following').html(userJSON.following);
+
+			$('body').append(temp);
+		}
+	},
+
+	// store search history
+	history = function(userJSON) {
+		localStorage[userJSON.id] = userJSON.name;
+	};
+
+	var search = githubBugle('#search-bar');
+	
+	search.sub('user', history);
+	bio.init('#bio', search);
+
+	</script>
+</body>
+</html>
