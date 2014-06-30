@@ -3,7 +3,7 @@ describe('extend', function() {
 
 	'use strict';
 
-	var extend = function(obj, constructor) {
+	var _extend = function(obj, constructor) {
 		var child = obj.extend({
 			'_constructor': constructor
 		});
@@ -91,9 +91,9 @@ describe('extend', function() {
 			})
 		},
 
-		ancestor = extend(Bugle, constructor)(),
-		parent = extend(ancestor, constructor)(),
-		child = extend(parent, constructor)();
+		ancestor =_extend(Bugle, constructor)(),
+		parent =_extend(ancestor, constructor)(),
+		child =_extend(parent, constructor)();
 
 		child.pub(TOPIC_NAMESPACE, [1,2]);
 
@@ -101,5 +101,43 @@ describe('extend', function() {
 
 		expect(globalState.length).toBe(6);
 		expect(globalState).toEqual([1,2,1,2,1,2]);
+	});
+
+	it('can publish messages to its children', function() {
+		
+		var TOPIC_NAMESPACE = 'below',
+		MSG = 'update',
+
+		globalState = null,
+
+		parentBlueprint = Bugle.extend({
+			'_constructor': function() { },
+
+			'toChildren': function() {
+				this.pub(TOPIC_NAMESPACE, MSG);
+			}
+		});
+
+		var parent = parentBlueprint(),
+
+		child =_extend(parent, function() {
+			this.sub(TOPIC_NAMESPACE, function(msg) {
+				globalState = msg;
+			});
+		})();
+
+		expect(globalState).toBe(null);
+
+		// topic should be in scope of parent and child
+		expect(parent.topics[TOPIC_NAMESPACE].length).toBe(1);
+		expect(child.topics[TOPIC_NAMESPACE].length).toBe(1);
+
+		// publish to topic
+		parent.toChildren();
+
+		jasmine.clock().tick(10);
+
+		// child should receive published msg
+		expect(globalState).toBe(MSG);
 	});
 });
