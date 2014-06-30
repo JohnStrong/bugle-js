@@ -26,7 +26,7 @@ To use bugle-js pre-release, you can
 ```bash
 git clone https://github.com/JohnStrong/bugle-js.git
 ```
-Even Bugle-js project project should include ``lib/bugle-js``.
+Every Bugle-js project should include ``lib/bugle-js``.
 
 ##Test
 
@@ -35,7 +35,7 @@ All Bugle-js BDD tests use <a href="http://jasmine.github.io/">jasmine</a>.
 You can view the current state of Bugle-js by running the jasmine SpecRunner (located ``test/jasmine/SpecRunner.html``).
 This will open a HTML page in your browser, showing the current pass/failure rate of the test suite.
 
-Ensure that jasmine is installed on your machine and referenced correctly in the SpecRunner before running tests.
+Ensure that jasmine is installed on your machine and referenced correctly in the SpecRunner before running.
 
 ##License
 
