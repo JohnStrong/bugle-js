@@ -16,15 +16,16 @@ describe('subscribe', function() {
 
 	// build n number of Any type
 	// returns as Array
-	build = function(n, topic) {
-		var arr = [];
+	build = function(n, operation) {
+		
+		function _build(curr, arr) {
+			
+			if(curr === 0) return arr;
 
-		while(n) {
-			arr.push(topic);
-			n--;
+			return _build(--n, arr.concat(operation))
 		}
 
-		return arr;
+		return _build(n, []);
 	},
 
 	topic = function(namespace) {
