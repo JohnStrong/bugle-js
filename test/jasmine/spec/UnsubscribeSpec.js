@@ -80,11 +80,13 @@ describe('unsubscribe', function() {
 		expect(status).toBe(true);
 		
 		// oId should not be unsubscribed yet (event is asynchronous)
+		expect(bugle.topics[TEST_NAMESPACE][0].oId).toBe(oId);
 		expect(bugle.topics[TEST_NAMESPACE].length).not.toBe(0);
 
 		tick();
 
 		// expect oId to now be unsubscribed
+		expect(bugle.topics[TEST_NAMESPACE][0]).not.toBeDefined();
 		expect(bugle.topics[TEST_NAMESPACE].length).toBe(0);
 	});
 
