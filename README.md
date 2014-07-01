@@ -19,18 +19,20 @@ This serves to free up a project's main event loop resulting in a responsive sys
 
 ##Install
 
-Right now there is no 'official' Bugle-js distribution.
+<b>Status</b>: v0.1.0 (unstable).
 
-To use bugle-js pre-release, you can
+At the time of writing, Bugle-js is 'pre-release', that said, pre-release distributions can be found in ``dist/``.
 
+If you would prefer, you can clone the entire repo with:
 ```bash
 git clone https://github.com/JohnStrong/bugle-js.git
 ```
-Every Bugle-js project should include a bugle-js source file (located at ``lib/bugle-js``).
 
 ##Test
 
 All Bugle-js BDD tests use <a href="http://jasmine.github.io/">jasmine</a>.
+
+To run the jasmine test suites for Bugle-js, first you must git clone this repo (see above).
 
 You can view the current state of Bugle-js by running the jasmine SpecRunner (located ``test/jasmine/SpecRunner.html``).
 This will open a HTML page in your browser, showing the current pass/failure rate of the test suite.
