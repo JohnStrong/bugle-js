@@ -1,7 +1,7 @@
 {
 	"name": "bugle-js",
-	"description": "simple publish & subscribe javascript project",
-	"version": "0.0.1",
+	"description": "event-driven publish-subscribe javascript api",
+	"version": "0.1.0",
 	"author": {
 		"name": "John Strong",
 		"email": "strngj411@gmail.com"
