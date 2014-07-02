@@ -3,6 +3,8 @@ describe('api', function() {
 
 	var bugle,
 
+	NOT_OBJECT_ERROR = 'argument to Bugle extend must be a literal object',
+
 	methods = {
 		'_constructor': function() { },
 		'doTest': function() { }
@@ -17,10 +19,19 @@ describe('api', function() {
 		expect(bugle).toBeDefined();
 	});
 
-	it("should expect an object", function() {
+	it("should expect an object of +n length", function() {
 		
-		expect(bugle()).not.toBeDefined();
-		expect(bugle({})).not.toBeDefined();
+		try {
+			bugle();
+		} catch (e) {
+			expect(e).toBe(NOT_OBJECT_ERROR);
+		}
+
+		try {
+			bugle({})
+		} catch (e) {
+			expect(e).toBe(NOT_OBJECT_ERROR);
+		}
 
 		expect(bugle(methods)).toBeDefined();
 	});
