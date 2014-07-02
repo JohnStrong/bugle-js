@@ -103,11 +103,8 @@ describe('unsubscribe', function() {
 
 	it('will not throw an error if topic cannot be found', function() {
 		
-		try {
-			bugle.unsub('emptyTopic', 1);
-			tick();
-		} catch(e) {
-			expect(e).toBe(UNSUB_ERROR_MSG);
-		}
+		var res = bugle.unsub('emptyTopic', 1);
+		tick();
+		expect(res).toBe(undefined);
 	});
 });

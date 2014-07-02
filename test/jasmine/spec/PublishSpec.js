@@ -63,12 +63,13 @@ describe('publish', function() {
 		jasmine.clock().uninstall();
 	});
 
-	/*
 	it('will not throw if a topic is empty', function() {
-		bugle.pub(TEST_NAMESPACE, []);
+		var res = bugle.pub(TEST_NAMESPACE, []);
 		tick();
+
+		// hack to verify that no error has been throw by bugle call
+		expect(res).toBe(undefined);
 	});
-	*/
 
 	it('throws error if topic param is NOT type String', function() {
 		try {
