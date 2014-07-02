@@ -11,7 +11,7 @@ describe('publish', function() {
 
 	BUILD_QTY = 100,
 
-	PUB_ERROR_MSG = 'UASGE [ topic:String, data:Array[Any...] ]',
+	PUB_ERROR_MSG = 'UASGE [ topic:String[, data1:Any[, data2:Any[, ..]]] ]',
 
 	// test state
 	bugle, pubTest,
@@ -63,20 +63,19 @@ describe('publish', function() {
 		jasmine.clock().uninstall();
 	});
 
+	/*
 	it('will not throw if a topic is empty', function() {
-		expect(bugle.pub(TEST_NAMESPACE, [])).toBe(true);
+		bugle.pub(TEST_NAMESPACE, []);
+		tick();
 	});
+	*/
 
 	it('throws error if topic param is NOT type String', function() {
-		
-		expect(bugle.pub(TEST_NAMESPACE, [])).toBe(true);
-		
-		// best i could do right now...
 		try {
-			bugle.pub(null, []);
+			bugle.pub(null, [])
 		} catch(e) {
 			expect(e).toBe(PUB_ERROR_MSG);
-		}
+		} 
 	});
 
 	it('is completely asynchronous', function() {

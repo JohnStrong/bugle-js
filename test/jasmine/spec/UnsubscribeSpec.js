@@ -13,7 +13,7 @@ describe('unsubscribe', function() {
 
 	tick = function() {
 		jasmine.clock().tick(ASYNC_WAIT);
-	}
+	};
 
 	beforeEach(function() {
 		jasmine.clock().install();
@@ -30,12 +30,24 @@ describe('unsubscribe', function() {
 		jasmine.clock().uninstall();	
 	});
 
-	it('throws error if topic param is NOT type String', function() {
+	it('throws error if topic param is NOT a String', function() {
+		
+		var oId = bugle.sub(TEST_NAMESPACE, function() {});
+	
+		try {
+			bugle.unsub(null, oId)
+			tick();
+		} catch(e) {
+			expect(e).toBe(UNSUB_ERROR_MSG);
+		}
+	});
 
+	it('throws error if oId param is NOT a Number', function() {
 		var oId = bugle.sub(TEST_NAMESPACE, function() {});
 
 		try {
-			bugle.unsub(null, oId);
+			bugle.unsub(TEST_NAMESPACE, '1');
+			tick();
 		} catch(e) {
 			expect(e).toBe(UNSUB_ERROR_MSG);
 		}
@@ -46,7 +58,8 @@ describe('unsubscribe', function() {
 		bugle.sub(TEST_NAMESPACE, function() {});
 
 		try {
-			bugle.unsub(TEST_NAMESPACE)
+			bugle.unsub(TEST_NAMESPACE);
+			tick();
 		} catch(e) {
 			expect(e).toBe(UNSUB_ERROR_MSG);
 		}
@@ -77,8 +90,6 @@ describe('unsubscribe', function() {
 		var oId = bugle.sub(TEST_NAMESPACE, function() {}),
 		status = bugle.unsub(TEST_NAMESPACE, oId);
 
-		expect(status).toBe(true);
-		
 		// oId should not be unsubscribed yet (event is asynchronous)
 		expect(bugle.topics[TEST_NAMESPACE][0].oId).toBe(oId);
 		expect(bugle.topics[TEST_NAMESPACE].length).not.toBe(0);
@@ -90,7 +101,13 @@ describe('unsubscribe', function() {
 		expect(bugle.topics[TEST_NAMESPACE].length).toBe(0);
 	});
 
-	it('returns false in unsubscribe if specified topic is not found', function() {
-		expect(bugle.unsub('emptyTopic', 1)).toBe(false);
+	it('will not throw an error if topic cannot be found', function() {
+		
+		try {
+			bugle.unsub('emptyTopic', 1);
+			tick();
+		} catch(e) {
+			expect(e).toBe(UNSUB_ERROR_MSG);
+		}
 	});
 });
