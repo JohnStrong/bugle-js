@@ -31,7 +31,7 @@ describe('extend', function() {
 		})();
 
 		expect(child.data).toBeDefined();
-		expect(child.data).toEqual([1,2,3]);
+		expect(child.data).toEqual(parent.data);
 	});
 
 	it('can publish messages to parent instance', function() {
@@ -54,6 +54,8 @@ describe('extend', function() {
 
 		jasmine.clock().tick(10);
 
+		expect(parent).toBeDefined();
+		expect(child).toBeDefined();
 		expect(globalState).toEqual([1,2,3]);
 	});
 
