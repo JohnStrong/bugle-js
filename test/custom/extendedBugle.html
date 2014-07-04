@@ -106,8 +106,9 @@
 		console.log('published....');
 
 		setTimeout(function() {
+			console.log('unsub ' + oId);
 			extendedBugle.unsub('cause', oId);
-		}, 1);
+		}, 10);
 		
 
 		/************************
@@ -167,7 +168,7 @@
 			function() {
 				return extendedBugle.topics['cause'].length === 2;
 			}, function() {
-				console.log('unsubeed from cause');
+				console.log('unsubbed from cause');
 				console.log(extendedBugle.topics['cause']);
 			}
 		);
