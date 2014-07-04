@@ -105,15 +105,10 @@
 		extendedBugle.input([1,2,3,4]);
 		console.log('published....');
 
-		/*
-		var custom = extendedBugle.extend({
-			'_constructor': function () { console.log('init', this.input); }
-		});
-
-		custom();
-		*/
-
-		//var status = extendedBugle.unsub('cause');
+		setTimeout(function() {
+			extendedBugle.unsub('cause', oId);
+		}, 1);
+		
 
 		/************************
 		 *
@@ -166,7 +161,16 @@
 				console.log('three subscribers in \'cause\'');
 				console.log(extendedBugle.topics['cause']);
 			}
-		)
+		);
+
+		when(
+			function() {
+				return extendedBugle.topics['cause'].length === 2;
+			}, function() {
+				console.log('unsubeed from cause');
+				console.log(extendedBugle.topics['cause']);
+			}
+		);
 
 	</script>
 	<script type="text/template">
