@@ -59,6 +59,7 @@
 		};
 
 		Environment1.prototype.store = function(data) {
+			console.log('data called', data);
 			this.state = data;
 		};
 
@@ -74,9 +75,7 @@
 		// NOTE: init must be defined if we want custom state
 		var ExtenedBugle = Bugle.extend({
 			
-			'_constructor': function(array) {
-				console.log(array);
-			},
+			'_constructor': function(array) {},
 
 			'input': function(data) {
 				this.pub('cause', data);
@@ -99,14 +98,24 @@
 		var reference = extendedBugle.sub('cause', environment1.store, environment1);
 		extendedBugle.sub('cause', environment2.append, environment2);
 		
-		// anom subscriber
+		// anom subscribe;
 		extendedBugle.sub('cause', function(data) { });
 
+		// pipe events... mock publish functionality
+		reference.pipe('map', function(item) {
+			console.log('map called', item);
+			return item.concat(5,6,7);
+		}).pipe('filter', function(item) {
+			console.log('filter called', item);
+			return item;
+		});
+		
+		// publish to subscribers
 		extendedBugle.input([1,2,3,4]);
-		console.log('published....');
+		//console.log('published....');
 
+		// unsub after some time
 		setTimeout(function() {
-			console.log('unsub ' + reference);
 			extendedBugle.unsub('cause', reference);
 		}, 1000);
 		
@@ -130,7 +139,7 @@
 		// 'environment1' state should become [1,2,3,4]
 		when(
 			function() {
-				return environment1.state.length === 4;
+				return environment1.state.length > 0;
 			},
 			function() {
 				console.log('passed test case environment1...');
@@ -147,7 +156,6 @@
 			},
 			function() {
 				console.log('passed test case environment2...');
-
 				console.log(environment2);
 				console.log(environment2.state);
 			}
@@ -166,7 +174,7 @@
 
 		when(
 			function() {
-				return extendedBugle.topics['cause'].length === 2;
+				return extendedBugle.topics['cause'][0].oId !== 1;
 			}, function() {
 				console.log('unsubbed from cause');
 				console.log(extendedBugle.topics['cause']);

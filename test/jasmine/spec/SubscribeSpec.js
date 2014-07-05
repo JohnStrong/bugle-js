@@ -90,7 +90,7 @@ describe('subscribe', function() {
 		sub = values.take(1)[0];
 
 		expect(topicLen).toBe(1);
-		expect(type(sub.fn)).toBe('Function');
+		expect(type(sub.done)).toBe('Function');
 	});
 
 	it('can subscribe a named function to a topic', function() {
@@ -104,7 +104,7 @@ describe('subscribe', function() {
 		sub = named.take(1)[0];
 
 		expect(len).toBe(1);
-		expect(type(sub.fn)).toBe('Function');
+		expect(type(sub.done)).toBe('Function');
 	});
 
 	it('can subscribe an object method to a topic', function() {
@@ -117,7 +117,7 @@ describe('subscribe', function() {
 		sub = values.take(1)[0];
 
 		expect(topicLen).toBe(1);
-		expect(type(sub.fn)).toBe('Function');
+		expect(type(sub.done)).toBe('Function');
 
 	});
 
@@ -156,7 +156,7 @@ describe('subscribe', function() {
 			expect(sample[ith].oId).toBe(refs[ith].oId);
 
 			// each 'sample' member should contain a valid function
-			expect(type(sample[ith].fn)).toBe('Function');
+			expect(type(sample[ith].done)).toBe('Function');
 		}
 	});
 });
