@@ -96,7 +96,7 @@
 		environment2 = new Environment2([1,2,3]);
 
 		// model subscribers
-		var oId = extendedBugle.sub('cause', environment1.store, environment1);
+		var reference = extendedBugle.sub('cause', environment1.store, environment1);
 		extendedBugle.sub('cause', environment2.append, environment2);
 		
 		// anom subscriber
@@ -106,9 +106,9 @@
 		console.log('published....');
 
 		setTimeout(function() {
-			console.log('unsub ' + oId);
-			extendedBugle.unsub('cause', oId);
-		}, 10);
+			console.log('unsub ' + reference);
+			extendedBugle.unsub('cause', reference);
+		}, 1000);
 		
 
 		/************************

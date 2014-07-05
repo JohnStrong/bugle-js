@@ -121,9 +121,10 @@ describe('subscribe', function() {
 
 	});
 
-	it('returns a reference id (oId) for each new subscription', function() {
-		var oId = bugle.sub('oId', function() { });
-		expect(type(oId)).toBe('Number');
+	it('returns a subscriber reference serves as users handle for later unsubscribe', 
+	function() {
+		var reference = bugle.sub('oId', function() { });
+		expect(type(reference.oId)).toBe('Number');
 	});
 
 	it('can have multiple subscriptions to a topic', function() {
@@ -134,7 +135,7 @@ describe('subscribe', function() {
 
 		// subscribes each test function to 'multiples' topic
 		fns = build(SAMPLE_LENGTH, function() {}),
-		oIds = fns.map(function(testFn) { 
+		refs = fns.map(function(testFn) { 
 			return bugle.sub(TEST_NAMESPACE, testFn); 
 		});
 
@@ -149,8 +150,10 @@ describe('subscribe', function() {
 
 		for(var ith = 0; ith < SUBSET_LENGTH; ith++) {
 
-			// oId in 'sample' should equal its corresponding value in 'oIds'
-			expect(sample[ith].oId).toBe(oIds[ith]);
+			expect(type(sample[ith].oId)).toBe('Number');
+
+			// reference in 'sample' should equal its corresponding value in 'oIds'
+			expect(sample[ith].oId).toBe(refs[ith].oId);
 
 			// each 'sample' member should contain a valid function
 			expect(type(sample[ith].fn)).toBe('Function');
