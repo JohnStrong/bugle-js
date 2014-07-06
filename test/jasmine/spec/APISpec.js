@@ -14,7 +14,6 @@ describe('api', function() {
 		bugle = Bugle.extend;
 	});
 
-
 	it("should contain extend member", function() {
 		expect(bugle).toBeDefined();
 	});

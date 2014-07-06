@@ -8,36 +8,12 @@ describe('publish', function() {
 	SOME_NAMESPACE = '~pubTest',
 
 	ASYNC_WAIT = 10,
-
 	BUILD_QTY = 100,
 
 	PUB_ERROR_MSG = 'UASGE [ topic:String[, data1:Any[, data2:Any[, ..]]] ]',
 
 	// test state
-	bugle, pubTest,
-
-	tick = function() {
-		jasmine.clock().tick(ASYNC_WAIT);
-	},	
-
-	sum = function(arr) {
-		return arr.reduce(function(prev, curr) {
-			return prev + curr;
-		});
-	},
-
-	// build n number of Any type
-	// returns as Array
-	build = function(n, topic) {
-		var arr = [];
-
-		while(n) {
-			arr.push(topic);
-			n--;
-		}
-
-		return arr;
-	};
+	bugle, pubTest;
 
 	beforeEach(function() {
 		jasmine.clock().install();
@@ -65,7 +41,7 @@ describe('publish', function() {
 
 	it('will not throw if a topic is empty', function() {
 		var res = bugle.pub(TEST_NAMESPACE, []);
-		tick();
+		tick(ASYNC_WAIT);
 
 		// hack to verify that no error has been throw by bugle call
 		expect(res).toBe(undefined);
@@ -96,7 +72,7 @@ describe('publish', function() {
 		expect(syncStr).not.toEqual(asyncStr);
 		
 		// make test wait
-		tick();
+		tick(ASYNC_WAIT);
 
 		expect(pubTest.handler).toHaveBeenCalled();
 		expect(syncStr).toEqual(asyncStr);
@@ -110,9 +86,9 @@ describe('publish', function() {
 		spyOn(pubTest, 'handler').and.callThrough();
 
 		// build 100 pubTest, subscribe each
-		var testNum = 1;
+		var testNum = 1,
 
-		var refs = build(BUILD_QTY, pubTest).map(function(obj) {
+		refs = util.build(BUILD_QTY, pubTest).map(function(obj) {
 			return bugle.sub(TEST_NAMESPACE, obj);
 		});
 
@@ -125,17 +101,17 @@ describe('publish', function() {
 		// publish to the topic namespace
 		bugle.pub(TEST_NAMESPACE, testNum);
 
-		tick();
+		tick(ASYNC_WAIT);
 
 		expect(pubTest.handler).toHaveBeenCalledWith(testNum);
-		expect(sum(pubTest.state)).toEqual(BUILD_QTY);
+		expect(util.sum(pubTest.state)).toEqual(BUILD_QTY);
 	});
 
 	it('ONLY forwards data to subscribers on the specified topic', function() {
 
 		var testArr = [1,2,3],
 
-		testInstances = build(BUILD_QTY, pubTest),
+		testInstances = util.build(BUILD_QTY, pubTest),
 		used = testInstances.splice(0, 50),
 
 		// to be ignored test object
@@ -165,7 +141,7 @@ describe('publish', function() {
 		// publish to 'pubTest'
 		bugle.pub(TEST_NAMESPACE, testArr);
 		
-		tick();
+		tick(ASYNC_WAIT);
 
 		expect(pubTest.handler).toHaveBeenCalled();
 		expect(ignoreTest.handler).not.toHaveBeenCalled();
@@ -183,7 +159,7 @@ describe('publish', function() {
 
 		bugle.pub(TEST_NAMESPACE);
 
-		tick();
+		tick(ASYNC_WAIT);
 
 		expect(state).not.toBeDefined();
 	});

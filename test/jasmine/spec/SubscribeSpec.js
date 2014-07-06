@@ -7,42 +7,7 @@ describe('subscribe', function() {
 
 	SUB_ERROR_MSG = 'USAGE [ topic:String, object:Object, toCall:String ]',
 
-	bugle,
-
-	// returns the REAL type of some value
-	type = function(val) {
-		return Object.prototype.toString.call(val).slice(8, -1);
-	},
-
-	// build n number of Any type
-	// returns as Array
-	build = function(n, operation) {
-		
-		function _build(curr, arr) {
-			
-			if(curr === 0) return arr;
-
-			return _build(--n, arr.concat(operation))
-		}
-
-		return _build(n, []);
-	},
-
-	topic = function(namespace) {
-		
-		var topic = bugle.topics[namespace];
-
-		return {
-			
-			'len': function() {
-				return topic.length;
-			},
-
-			'take': function(n) {
-				return topic.splice(0, Math.min(this.len(), n));
-			}
-		};
-	};
+	bugle, topicHandle;
 
 	beforeEach(function() {
 		
@@ -63,6 +28,8 @@ describe('subscribe', function() {
 			}
 
 		})(1,2);
+
+		topicHandle = util.topic(bugle);
 	});
 
 	beforeEach(function() {
@@ -98,7 +65,7 @@ describe('subscribe', function() {
 		ref.pipe('done', function() { });
 
 		expect(ref._pipeline_.length).toBe(1);
-		expect(type(ref._pipeline_[0])).toBe('Function');
+		expect(util.type(ref._pipeline_[0])).toBe('Function');
 	});
 
 	it('can subscribe a named function to a topic', function() {
@@ -110,7 +77,7 @@ describe('subscribe', function() {
 		ref.pipe('done', namedFunction);
 
 		expect(ref._pipeline_.length).toBe(1);
-		expect(type(ref._pipeline_[0])).toBe('Function');
+		expect(util.type(ref._pipeline_[0])).toBe('Function');
 
 		function namedFunction() { };
 	});
@@ -126,7 +93,7 @@ describe('subscribe', function() {
 		ref.pipe('done', bugle.update);
 
 		expect(ref._pipeline_.length).toBe(1);
-		expect(type(ref._pipeline_[0])).toBe('Function');
+		expect(util.type(ref._pipeline_[0])).toBe('Function');
 
 	});
 
@@ -140,7 +107,7 @@ describe('subscribe', function() {
 
 		bugle.pub(TEST_NAMESPACE, 'a', 'b');
 
-		jasmine.clock().tick(100);
+		util.tick(100);
 
 		expect(bugle.a).toBe('a');
 		expect(bugle.b).toBe('b');
@@ -151,7 +118,7 @@ describe('subscribe', function() {
 	it('returns a subscriber reference serves as users handle for later unsubscribe', 
 	function() {
 		var reference = bugle.sub('oId');
-		expect(type(reference.oId)).toBe('Number');
+		expect(util.type(reference.oId)).toBe('Number');
 	});
 
 	it('can have multiple subscriptions to a topic', function() {
@@ -161,13 +128,13 @@ describe('subscribe', function() {
 		SUBSET_LENGTH = 50,
 
 		// subscribes each test function to 'multiples' topic
-		fns = build(SAMPLE_LENGTH, function() {}),
+		fns = util.build(SAMPLE_LENGTH, function() {}),
 		refs = fns.map(function() { 
 			return bugle.sub(TEST_NAMESPACE); 
 		});
 
 		// get length of the topic & take a subset for testing
-		var multiples = topic(TEST_NAMESPACE),
+		var multiples = topicHandle(TEST_NAMESPACE),
 		len = multiples.len(),
 		sample = multiples.take(SUBSET_LENGTH);
 
@@ -176,7 +143,7 @@ describe('subscribe', function() {
 		expect(len).toBe(SAMPLE_LENGTH);
 
 		for(var ith = 0; ith < SUBSET_LENGTH; ith++) {
-			expect(type(sample[ith].oId)).toBe('Number');
+			expect(util.type(sample[ith].oId)).toBe('Number');
 			expect(sample[ith].oId).toBe(refs[ith].oId);
 			expect(sample[ith]._pipeline_.length).toBe(0);
 		}
