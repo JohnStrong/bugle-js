@@ -80,8 +80,6 @@
 
 		// init ExtendedBugle with empty array
 		extendedBugle = ExtenedBugle([]),
-
-		// instantiate our environment object
 		environment1 = new Environment1([]);
 
 		// subscribe to cause, return reference
@@ -95,6 +93,7 @@
 			return item.length > 5;
 		}).pipe('done', environment1.store);
 
+		// pipe events... flatMap over
 		reference1.pipe('flatMap', function(item) {
 			return [item, [4,5,6]];
 		}).pipe('done', function(res, res2) {
@@ -116,7 +115,6 @@
 		 *	TEST CASES...
 		 *
 		 ***********************/
-
 		assert('extendedBugle should have Bugle properties')
 		
 		.with(function() {
