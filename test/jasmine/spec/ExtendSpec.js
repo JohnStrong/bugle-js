@@ -3,13 +3,8 @@ describe('extend', function() {
 
 	'use strict';
 
-	var _extend = function(obj, constructor) {
-		var child = obj.extend({
-			'_constructor': constructor
-		});
-
-		return child;
-	};
+	var TOPIC_NAMESPACE = 'extendTest',
+	ASYNC_WAIT = 100;
 
 	beforeEach(function() {
 		jasmine.clock().install();
@@ -40,7 +35,7 @@ describe('extend', function() {
 
 		parent = Bugle.extend({
 			'_constructor': function() {
-				this.sub('pubTest').pipe('done',
+				this.sub(TOPIC_NAMESPACE).pipe('done',
 				function(data) {
 					globalState = data;
 				});
@@ -49,11 +44,11 @@ describe('extend', function() {
 
 		child = parent.extend({
 			'_constructor': function(data) {
-				this.pub('pubTest', data);
+				this.pub(TOPIC_NAMESPACE, data);
 			}
 		})([1,2,3]);
 
-		jasmine.clock().tick(10);
+		util.tick(ASYNC_WAIT);
 
 		expect(parent).toBeDefined();
 		expect(child).toBeDefined();
@@ -62,9 +57,7 @@ describe('extend', function() {
 
 	it('can subscribe objects on parent instance', function() {
 
-		var TOPIC_NAMESPACE = 'subTest',
-
-		parent = Bugle.extend({
+		var parent = Bugle.extend({
 			'_constructor': function() {}
 		})();
 
@@ -82,9 +75,7 @@ describe('extend', function() {
 
 	it('publishes messages all the way up the prototype chain', function() {
 
-		var TOPIC_NAMESPACE = 'chainTest',
-
-		globalState = [],
+		var globalState = [],
 
 		constructor = function() {
 			this.sub(TOPIC_NAMESPACE).pipe('done', 
@@ -93,13 +84,13 @@ describe('extend', function() {
 			});
 		},
 
-		ancestor =_extend(Bugle, constructor)(),
-		parent =_extend(ancestor, constructor)(),
-		child =_extend(parent, constructor)();
+		ancestor = util.extend(Bugle, constructor)(),
+		parent = util.extend(ancestor, constructor)(),
+		child = util.extend(parent, constructor)();
 
 		child.pub(TOPIC_NAMESPACE, [1,2]);
 
-		jasmine.clock().tick(10);
+		util.tick(ASYNC_WAIT);
 
 		expect(globalState.length).toBe(6);
 		expect(globalState).toEqual([1,2,1,2,1,2]);
@@ -107,8 +98,7 @@ describe('extend', function() {
 
 	it('can publish messages to its children', function() {
 		
-		var TOPIC_NAMESPACE = 'below',
-		MSG = 'update',
+		var MSG = 'update',
 
 		globalState = null,
 
@@ -120,7 +110,7 @@ describe('extend', function() {
 			}
 		})(),
 
-		child =_extend(parent, function() {
+		child = util.extend(parent, function() {
 			this.sub(TOPIC_NAMESPACE).pipe('done', 
 			function(msg) {
 				globalState = msg;
@@ -136,7 +126,7 @@ describe('extend', function() {
 		// publish to topic
 		parent.toChildren();
 
-		jasmine.clock().tick(10);
+		util.tick(ASYNC_WAIT);
 
 		// child should receive published msg
 		expect(globalState).toBe(MSG);

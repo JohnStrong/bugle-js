@@ -43,6 +43,14 @@ window.util = (function() {
 		return arr.reduce(function(prev, curr) {
 			return prev + curr;
 		});
+	},
+
+	extend = function(obj, constructor) {
+		var child = obj.extend({
+			'_constructor': constructor
+		});
+
+		return child;
 	};
 
 	return {
@@ -50,6 +58,7 @@ window.util = (function() {
 		'build': build,
 		'topic': topic,
 		'tick': tick,
-		'sum': sum
+		'sum': sum,
+		'extend': extend
 	};
 })();
