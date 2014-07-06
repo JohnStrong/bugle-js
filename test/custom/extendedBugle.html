@@ -85,7 +85,8 @@
 		environment1 = new Environment1([]);
 
 		// subscribe to cause, return reference
-		var reference = extendedBugle.sub('cause', environment1);
+		var reference = extendedBugle.sub('cause', environment1),
+		reference1 = extendedBugle.sub('cause');
 		
 		// pipe events... and map/filter over
 		reference.pipe('map', function(item) {
@@ -93,6 +94,13 @@
 		}).pipe('filter', function(item) {
 			return item.length > 5;
 		}).pipe('done', environment1.store);
+
+		reference1.pipe('flatMap', function(item) {
+			return [item, [4,5,6]];
+		}).pipe('done', function(res, res2) {
+			console.log('[5,4,3,2,1,4,5,6]', res);
+			console.log('[1,2,4,5,6]', res2);
+		});
 		
 		// publish to subscriber
 		extendedBugle.input([5,4,3,1],[1,2]);
