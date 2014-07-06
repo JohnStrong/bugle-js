@@ -40,7 +40,8 @@ describe('extend', function() {
 
 		parent = Bugle.extend({
 			'_constructor': function() {
-				this.sub('pubTest', function(data) {
+				this.sub('pubTest').pipe('done',
+				function(data) {
 					globalState = data;
 				});
 			}
@@ -71,9 +72,7 @@ describe('extend', function() {
 
 		var child = parent.extend({
 			'_constructor': function() {
-				this.sub(TOPIC_NAMESPACE, function(data) {
-					//
-				});
+				this.sub(TOPIC_NAMESPACE);
 			}
 		})();
 
@@ -88,9 +87,10 @@ describe('extend', function() {
 		globalState = [],
 
 		constructor = function() {
-			this.sub(TOPIC_NAMESPACE, function(data) {
+			this.sub(TOPIC_NAMESPACE).pipe('done', 
+			function(data) {
 				globalState = globalState.concat(data);
-			})
+			});
 		},
 
 		ancestor =_extend(Bugle, constructor)(),
@@ -112,18 +112,17 @@ describe('extend', function() {
 
 		globalState = null,
 
-		parentBlueprint = Bugle.extend({
+		parent = Bugle.extend({
 			'_constructor': function() { },
 
 			'toChildren': function() {
 				this.pub(TOPIC_NAMESPACE, MSG);
 			}
-		});
-
-		var parent = parentBlueprint(),
+		})(),
 
 		child =_extend(parent, function() {
-			this.sub(TOPIC_NAMESPACE, function(msg) {
+			this.sub(TOPIC_NAMESPACE).pipe('done', 
+			function(msg) {
 				globalState = msg;
 			});
 		})();

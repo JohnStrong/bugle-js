@@ -54,7 +54,7 @@ describe('subscribe', function() {
 			},
 
 			'listen': function() {
-				this.sub(TEST_NAMESPACE, this.update);
+				return this.sub(TEST_NAMESPACE);
 			},
 
 			'update': function(a, b) {
@@ -65,6 +65,14 @@ describe('subscribe', function() {
 		})(1,2);
 	});
 
+	beforeEach(function() {
+		jasmine.clock().install();
+	});
+
+	afterEach(function() {
+		jasmine.clock().uninstall();
+	});
+
 	it('should start with an empty state', function() {
 
 		expect(bugle.oId).toBe(0);
@@ -72,58 +80,77 @@ describe('subscribe', function() {
 	});
 
 	it('expects a string topic namespace as its 1st parameter', function() {
-		expect(bugle.sub(TEST_NAMESPACE, function() {})).toBeTruthy();
+		expect(bugle.sub(TEST_NAMESPACE)).toBeTruthy();
 
 		try {
-			bugle.sub(null, function() {});
+			bugle.sub(null);
 		} catch(e) {
 			expect(e).toBe(SUB_ERROR_MSG);
 		}
 	});
 
-	it('can subscribe an anonymous function to a topic', function() {
+	it('can pipe anonymous function to done event in pipeline', function() {
 
-		bugle.sub(TEST_NAMESPACE, function() { });
+		var ref = bugle.sub(TEST_NAMESPACE);
 
-		var values = topic(TEST_NAMESPACE),
-		topicLen = values.len(),
-		sub = values.take(1)[0];
+		expect(ref._pipeline_.length).toBe(0);
 
-		expect(topicLen).toBe(1);
-		expect(type(sub.done)).toBe('Function');
+		ref.pipe('done', function() { });
+
+		expect(ref._pipeline_.length).toBe(1);
+		expect(type(ref._pipeline_[0])).toBe('Function');
 	});
 
 	it('can subscribe a named function to a topic', function() {
 		
-		function namedTest() {};
+		var ref = bugle.sub(TEST_NAMESPACE);
 
-		bugle.sub(TEST_NAMESPACE, namedTest);
+		expect(ref._pipeline_.length).toBe(0);
 
-		var named = topic(TEST_NAMESPACE),
-		len = named.len(),
-		sub = named.take(1)[0];
+		ref.pipe('done', namedFunction);
 
-		expect(len).toBe(1);
-		expect(type(sub.done)).toBe('Function');
+		expect(ref._pipeline_.length).toBe(1);
+		expect(type(ref._pipeline_[0])).toBe('Function');
+
+		function namedFunction() { };
 	});
 
-	it('can subscribe an object method to a topic', function() {
+	it('can subscribe from an object method to a topic', function() {
 
 		// subscribe bugle to 'values' topic
-		bugle.listen();
+		var ref = bugle.listen();
 
-		var values = topic(TEST_NAMESPACE),
-		topicLen = values.len(),
-		sub = values.take(1)[0];
+		expect(ref.oId).toBe(1);
+		expect(ref._pipeline_.length).toBe(0);
 
-		expect(topicLen).toBe(1);
-		expect(type(sub.done)).toBe('Function');
+		ref.pipe('done', bugle.update);
+
+		expect(ref._pipeline_.length).toBe(1);
+		expect(type(ref._pipeline_[0])).toBe('Function');
+
+	});
+
+	it('can subscribe with a custom scope', function() {
+		var ref = bugle.sub(TEST_NAMESPACE, bugle);
+
+		ref.pipe('done', function(data1, data2) {
+			this.a = data1;
+			this.b = data2;
+		});
+
+		bugle.pub(TEST_NAMESPACE, 'a', 'b');
+
+		jasmine.clock().tick(100);
+
+		expect(bugle.a).toBe('a');
+		expect(bugle.b).toBe('b');
+
 
 	});
 
 	it('returns a subscriber reference serves as users handle for later unsubscribe', 
 	function() {
-		var reference = bugle.sub('oId', function() { });
+		var reference = bugle.sub('oId');
 		expect(type(reference.oId)).toBe('Number');
 	});
 
@@ -135,8 +162,8 @@ describe('subscribe', function() {
 
 		// subscribes each test function to 'multiples' topic
 		fns = build(SAMPLE_LENGTH, function() {}),
-		refs = fns.map(function(testFn) { 
-			return bugle.sub(TEST_NAMESPACE, testFn); 
+		refs = fns.map(function() { 
+			return bugle.sub(TEST_NAMESPACE); 
 		});
 
 		// get length of the topic & take a subset for testing
@@ -149,14 +176,9 @@ describe('subscribe', function() {
 		expect(len).toBe(SAMPLE_LENGTH);
 
 		for(var ith = 0; ith < SUBSET_LENGTH; ith++) {
-
 			expect(type(sample[ith].oId)).toBe('Number');
-
-			// reference in 'sample' should equal its corresponding value in 'oIds'
 			expect(sample[ith].oId).toBe(refs[ith].oId);
-
-			// each 'sample' member should contain a valid function
-			expect(type(sample[ith].done)).toBe('Function');
+			expect(sample[ith]._pipeline_.length).toBe(0);
 		}
 	});
 });

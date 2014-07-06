@@ -32,7 +32,7 @@ describe('unsubscribe', function() {
 
 	it('throws error if topic param is NOT a String', function() {
 		
-		var reference = bugle.sub(TEST_NAMESPACE, function() {});
+		var reference = bugle.sub(TEST_NAMESPACE);
 	
 		try {
 			bugle.unsub(null, reference)
@@ -43,7 +43,7 @@ describe('unsubscribe', function() {
 	});
 
 	it('throws error if reference param is NOT a Number', function() {
-		var reference = bugle.sub(TEST_NAMESPACE, function() {});
+		var reference = bugle.sub(TEST_NAMESPACE);
 
 		try {
 			bugle.unsub(TEST_NAMESPACE, '1');
@@ -55,7 +55,7 @@ describe('unsubscribe', function() {
 
 	it('throws error if no reference is specified', function() {
 		
-		bugle.sub(TEST_NAMESPACE, function() {});
+		bugle.sub(TEST_NAMESPACE);
 
 		try {
 			bugle.unsub(TEST_NAMESPACE);
@@ -71,7 +71,7 @@ describe('unsubscribe', function() {
 			'handler': function() { }
 		},
 
-		reference = bugle.sub(TEST_NAMESPACE, asyncTest.handler, asyncTest),
+		reference = bugle.sub(TEST_NAMESPACE, asyncTest),
 		subscribers = bugle.topics[TEST_NAMESPACE];
 		
 		bugle.unsub(TEST_NAMESPACE, reference);
@@ -87,7 +87,7 @@ describe('unsubscribe', function() {
 
 	it("can unsubscribe an member from a topic with a valid reference", function() {
 
-		var reference = bugle.sub(TEST_NAMESPACE, function() {}),
+		var reference = bugle.sub(TEST_NAMESPACE),
 		status = bugle.unsub(TEST_NAMESPACE, reference);
 
 		// reference should not be unsubscribed yet (event is asynchronous)
@@ -102,7 +102,7 @@ describe('unsubscribe', function() {
 	});
 
 	it('will not throw an error if topic cannot be found', function() {
-		var ref = bugle.sub('topic', function() { }),
+		var ref = bugle.sub('topic'),
 		res = bugle.unsub('emptyTopic', ref);
 
 		tick();

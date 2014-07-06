@@ -63,22 +63,14 @@
 			this.state = data;
 		};
 
-		function Environment2(state) { 
-			this.state = state;
-		};
-
-		Environment2.prototype.append = function(data) {
-			this.state = this.state.concat(data);
-		};
-
 		// we can extended an object with custom properties
 		// NOTE: init must be defined if we want custom state
 		var ExtenedBugle = Bugle.extend({
 			
 			'_constructor': function(array) {},
 
-			'input': function(data) {
-				this.pub('cause', data);
+			'input': function(data1, data2) {
+				this.pub('cause', data1, data2);
 			},
 
 			'update': function(data1, data2) {
@@ -87,32 +79,23 @@
 		}),
 
 		// init ExtendedBugle with empty array
-		// NOTE: calls '_constructor' method
 		extendedBugle = ExtenedBugle([]),
 
 		// instantiate our environment object
-		environment1 = new Environment1([]),
-		environment2 = new Environment2([1,2,3]);
+		environment1 = new Environment1([]);
 
-		// model subscribers
-		var reference = extendedBugle.sub('cause', environment1.store, environment1);
-		extendedBugle.sub('cause', environment2.append, environment2);
+		// subscribe to cause, return reference
+		var reference = extendedBugle.sub('cause', environment1);
 		
-		// anom subscribe;
-		extendedBugle.sub('cause', function(data) { });
-
-		// pipe events... mock publish functionality
+		// pipe events... and map/filter over
 		reference.pipe('map', function(item) {
-			console.log('map called', item);
 			return item.concat(5,6,7);
 		}).pipe('filter', function(item) {
-			console.log('filter called', item);
-			return item;
-		});
+			return item.length > 5;
+		}).pipe('done', environment1.store);
 		
-		// publish to subscribers
-		extendedBugle.input([1,2,3,4]);
-		//console.log('published....');
+		// publish to subscriber
+		extendedBugle.input([5,4,3,1],[1,2]);
 
 		// unsub after some time
 		setTimeout(function() {
@@ -146,38 +129,6 @@
 
 				console.log(environment1);
 				console.log(environment1.state);
-			}
-		);
-
-		// 'environment2' state should be appended on 'cause' publish
-		when(
-			function() {
-				return environment2.state.length > 3;
-			},
-			function() {
-				console.log('passed test case environment2...');
-				console.log(environment2);
-				console.log(environment2.state);
-			}
-		);
-
-		// verify that three objects are added to 'cause' topic on 'extendedBugle'
-		when(
-			function() {
-				return extendedBugle.topics['cause'].length === 3;
-			},
-			function() {
-				console.log('three subscribers in \'cause\'');
-				console.log(extendedBugle.topics['cause']);
-			}
-		);
-
-		when(
-			function() {
-				return extendedBugle.topics['cause'][0].oId !== 1;
-			}, function() {
-				console.log('unsubbed from cause');
-				console.log(extendedBugle.topics['cause']);
 			}
 		);
 

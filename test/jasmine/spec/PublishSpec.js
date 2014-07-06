@@ -87,8 +87,10 @@ describe('publish', function() {
 			syncStr = str;
 		});
 
-		bugle.sub(TEST_NAMESPACE, pubTest.handler, pubTest);
+		var ref = bugle.sub(TEST_NAMESPACE, pubTest);
 		bugle.pub(TEST_NAMESPACE, asyncStr);
+
+		ref.pipe('done', pubTest.handler);
 		
 		expect(pubTest.handler).not.toHaveBeenCalled();
 		expect(syncStr).not.toEqual(asyncStr);
@@ -110,19 +112,22 @@ describe('publish', function() {
 		// build 100 pubTest, subscribe each
 		var testNum = 1;
 
-		build(BUILD_QTY, pubTest).forEach(function(obj) {
-			bugle.sub(TEST_NAMESPACE, obj.handler, obj);
+		var refs = build(BUILD_QTY, pubTest).map(function(obj) {
+			return bugle.sub(TEST_NAMESPACE, obj);
 		});
 
 		expect(bugle.topics[TEST_NAMESPACE].length).toBe(BUILD_QTY);
+
+		refs.forEach(function(ref) {
+			ref.pipe('done', pubTest.handler);
+		});
 
 		// publish to the topic namespace
 		bugle.pub(TEST_NAMESPACE, testNum);
 
 		tick();
 
-		// last arg to sub is ALWAYS the topic name...
-		expect(pubTest.handler).toHaveBeenCalledWith(testNum, TEST_NAMESPACE);
+		expect(pubTest.handler).toHaveBeenCalledWith(testNum);
 		expect(sum(pubTest.state)).toEqual(BUILD_QTY);
 	});
 
@@ -141,12 +146,20 @@ describe('publish', function() {
 		spyOn(pubTest, 'handler');
 		spyOn(ignoreTest, 'handler');
 		
-	 	used.forEach(function(obj) {
-			bugle.sub(TEST_NAMESPACE, obj.handler, obj);
+	 	var usedRefs = used.map(function(obj) {
+			return bugle.sub(TEST_NAMESPACE, obj);
+		}),
+
+		unusedRefs = testInstances.map(function(obj) {
+			return bugle.sub(SOME_NAMESPACE, obj);
 		});
 
-		testInstances.forEach(function(obj) {
-			bugle.sub(SOME_NAMESPACE, obj.handler, obj);
+		usedRefs.forEach(function(ref) {
+			ref.pipe('done', pubTest.handler);
+		});
+
+		unusedRefs.forEach(function(ref) {
+			ref.pipe('done', pubTest.handler);
 		});
 
 		// publish to 'pubTest'
@@ -158,17 +171,21 @@ describe('publish', function() {
 		expect(ignoreTest.handler).not.toHaveBeenCalled();
 	});
 
-	it('will call subscriber with lone topic name if no data sent on publish', function() {
+	it('will call subscriber done with undefined if no data sent on publish', function() {
 
-		var topicName,
-		toCall = function(topic) { topicName = topic; };
+		var state,
+		
+		ref = bugle.sub(TEST_NAMESPACE);
 
-		bugle.sub(TEST_NAMESPACE, toCall);
+		ref.pipe('done', function(maybeData) {
+			state = maybeData;
+		});
+
 		bugle.pub(TEST_NAMESPACE);
 
 		tick();
 
-		expect(topicName).toBe(TEST_NAMESPACE);
+		expect(state).not.toBeDefined();
 	});
 
 });
