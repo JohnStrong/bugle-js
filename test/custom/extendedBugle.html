@@ -96,18 +96,19 @@
 		// pipe events... flatMap over
 		reference1.pipe('flatMap', function(message) {
 			return [message, [4,5,6]];
-		}).pipe('done', function(res, res2) {
-			console.log('[5,4,3,2,1,4,5,6]', res);
-			console.log('[1,2,4,5,6]', res2);
+		}).pipe('done', function(msg1, msg2) {
+			console.log('[5,4,3,2,1,4,5,6]', msg1);
+			console.log('[1,2,4,5,6]', msg2);
 		});
-		
-		// publish to subscriber
-		extendedBugle.input([5,4,3,1],[1,2]);
+			
+		// unsub reference
+		extendedBugle.unsub('cause', reference);
 
-		// unsub after some time
+		// publish to reference1
 		setTimeout(function() {
-			extendedBugle.unsub('cause', reference);
+			extendedBugle.input([5,4,3,1],[1,2]);
 		}, 1000);
+		
 		
 
 		/************************
@@ -137,6 +138,16 @@
 				console.log(environment1.state);
 			}
 		);
+
+		when(
+			function() {
+				return extendedBugle.topics['cause'].length < 2;
+			},
+			function() {
+				console.log('unsubbed from cause');
+				console.log(extendedBugle.topics['cause']);
+			}
+		)
 
 	</script>
 	<script type="text/template">
