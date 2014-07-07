@@ -158,7 +158,7 @@ describe('publish', function() {
 		});
 
 		bugle.pub(TEST_NAMESPACE);
-
+		
 		tick(ASYNC_WAIT);
 
 		expect(state).not.toBeDefined();
