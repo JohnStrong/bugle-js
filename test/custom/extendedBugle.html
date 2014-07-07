@@ -87,16 +87,16 @@
 		reference1 = extendedBugle.sub('cause');
 		
 		// pipe events... and map/filter over
-		reference.pipe('map', function(message) {
+		reference.pipe().map(function(message) {
 			return message.concat(5,6,7);
-		}).pipe('filter', function(message) {
+		}).filter(function(message) {
 			return message.length > 5;
-		}).pipe('done', environment1.store);
+		}).receive(environment1.store);
 
 		// pipe events... flatMap over
-		reference1.pipe('flatMap', function(message) {
+		reference1.pipe().flatMap(function(message) {
 			return [message, [4,5,6]];
-		}).pipe('done', function(msg1, msg2) {
+		}).receive(function(msg1, msg2) {
 			console.log('[5,4,3,2,1,4,5,6]', msg1);
 			console.log('[1,2,4,5,6]', msg2);
 		});

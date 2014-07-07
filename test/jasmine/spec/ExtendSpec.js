@@ -35,8 +35,8 @@ describe('extend', function() {
 
 		parent = Bugle.extend({
 			'_constructor': function() {
-				this.sub(TOPIC_NAMESPACE).pipe('done',
-				function(data) {
+				this.sub(TOPIC_NAMESPACE).pipe()
+				.receive(function(data) {
 					globalState = data;
 				});
 			}
@@ -78,8 +78,8 @@ describe('extend', function() {
 		var globalState = [],
 
 		constructor = function() {
-			this.sub(TOPIC_NAMESPACE).pipe('done', 
-			function(data) {
+			this.sub(TOPIC_NAMESPACE).pipe()
+			.receive(function(data) {
 				globalState = globalState.concat(data);
 			});
 		},
@@ -111,8 +111,8 @@ describe('extend', function() {
 		})(),
 
 		child = util.extend(parent, function() {
-			this.sub(TOPIC_NAMESPACE).pipe('done', 
-			function(msg) {
+			this.sub(TOPIC_NAMESPACE).pipe()
+			.receive(function(msg) {
 				globalState = msg;
 			});
 		})();

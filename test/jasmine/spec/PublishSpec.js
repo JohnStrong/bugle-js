@@ -66,7 +66,7 @@ describe('publish', function() {
 		var ref = bugle.sub(TEST_NAMESPACE, pubTest);
 		bugle.pub(TEST_NAMESPACE, asyncStr);
 
-		ref.pipe('done', pubTest.handler);
+		ref.pipe().receive(pubTest.handler);
 		
 		expect(pubTest.handler).not.toHaveBeenCalled();
 		expect(syncStr).not.toEqual(asyncStr);
@@ -95,7 +95,7 @@ describe('publish', function() {
 		expect(bugle.topics[TEST_NAMESPACE].length).toBe(BUILD_QTY);
 
 		refs.forEach(function(ref) {
-			ref.pipe('done', pubTest.handler);
+			ref.pipe().receive(pubTest.handler);
 		});
 
 		// publish to the topic namespace
@@ -131,11 +131,11 @@ describe('publish', function() {
 		});
 
 		usedRefs.forEach(function(ref) {
-			ref.pipe('done', pubTest.handler);
+			ref.pipe().receive(pubTest.handler);
 		});
 
 		unusedRefs.forEach(function(ref) {
-			ref.pipe('done', pubTest.handler);
+			ref.pipe().receive(pubTest.handler);
 		});
 
 		// publish to 'pubTest'
@@ -147,13 +147,13 @@ describe('publish', function() {
 		expect(ignoreTest.handler).not.toHaveBeenCalled();
 	});
 
-	it('will call subscriber done with undefined if no data sent on publish', function() {
+	it('will call subscriber receive with undefined if no data sent on publish', function() {
 
 		var state,
 		
 		ref = bugle.sub(TEST_NAMESPACE);
 
-		ref.pipe('done', function(maybeData) {
+		ref.pipe('receive', function(maybeData) {
 			state = maybeData;
 		});
 
