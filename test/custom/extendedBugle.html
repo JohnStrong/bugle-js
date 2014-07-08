@@ -87,14 +87,14 @@
 		reference1 = extendedBugle.sub('cause');
 		
 		// pipe events... and map/filter over
-		reference.pipe().map(function(message) {
+		reference.map(function(message) {
 			return message.concat(5,6,7);
 		}).filter(function(message) {
 			return message.length > 5;
 		}).receive(environment1.store);
 
 		// pipe events... flatMap over
-		reference1.pipe().flatMap(function(message) {
+		reference1.flatMap(function(message) {
 			return [message, [4,5,6]];
 		}).receive(function(msg1, msg2) {
 			console.log('[5,4,3,2,1,4,5,6]', msg1);
@@ -102,7 +102,7 @@
 		});
 			
 		// unsub reference
-		extendedBugle.unsub('cause', reference);
+		extendedBugle.unsub('cause', reference1);
 
 		// publish to reference1
 		setTimeout(function() {

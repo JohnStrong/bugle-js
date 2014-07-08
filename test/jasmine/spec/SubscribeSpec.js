@@ -62,7 +62,7 @@ describe('subscribe', function() {
 
 		expect(ref._pipeline_.length).toBe(0);
 
-		ref.pipe().receive(function() { });
+		ref.receive(function() { });
 
 		expect(ref._pipeline_.length).toBe(1);
 		expect(util.type(ref._pipeline_[0])).toBe('Function');
@@ -74,7 +74,7 @@ describe('subscribe', function() {
 
 		expect(ref._pipeline_.length).toBe(0);
 
-		ref.pipe().receive(namedFunction);
+		ref.receive(namedFunction);
 
 		expect(ref._pipeline_.length).toBe(1);
 		expect(util.type(ref._pipeline_[0])).toBe('Function');
@@ -90,7 +90,7 @@ describe('subscribe', function() {
 		expect(ref.oId).toBe(1);
 		expect(ref._pipeline_.length).toBe(0);
 
-		ref.pipe().receive(bugle.update);
+		ref.receive(bugle.update);
 
 		expect(ref._pipeline_.length).toBe(1);
 		expect(util.type(ref._pipeline_[0])).toBe('Function');
@@ -100,7 +100,7 @@ describe('subscribe', function() {
 	it('can subscribe with a custom scope', function() {
 		var ref = bugle.sub(TEST_NAMESPACE, bugle);
 
-		ref.pipe().receive(function(data1, data2) {
+		ref.receive(function(data1, data2) {
 			this.a = data1;
 			this.b = data2;
 		});

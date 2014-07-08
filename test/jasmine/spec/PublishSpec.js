@@ -66,7 +66,7 @@ describe('publish', function() {
 		var ref = bugle.sub(TEST_NAMESPACE, pubTest);
 		bugle.pub(TEST_NAMESPACE, asyncStr);
 
-		ref.pipe().receive(pubTest.handler);
+		ref.receive(pubTest.handler);
 		
 		expect(pubTest.handler).not.toHaveBeenCalled();
 		expect(syncStr).not.toEqual(asyncStr);
@@ -95,7 +95,7 @@ describe('publish', function() {
 		expect(bugle.topics[TEST_NAMESPACE].length).toBe(BUILD_QTY);
 
 		refs.forEach(function(ref) {
-			ref.pipe().receive(pubTest.handler);
+			ref.receive(pubTest.handler);
 		});
 
 		// publish to the topic namespace
@@ -131,11 +131,11 @@ describe('publish', function() {
 		});
 
 		usedRefs.forEach(function(ref) {
-			ref.pipe().receive(pubTest.handler);
+			ref.receive(pubTest.handler);
 		});
 
 		unusedRefs.forEach(function(ref) {
-			ref.pipe().receive(pubTest.handler);
+			ref.receive(pubTest.handler);
 		});
 
 		// publish to 'pubTest'
@@ -153,7 +153,7 @@ describe('publish', function() {
 		
 		ref = bugle.sub(TEST_NAMESPACE);
 
-		ref.pipe('receive', function(maybeData) {
+		ref.receive(function(maybeData) {
 			state = maybeData;
 		});
 
