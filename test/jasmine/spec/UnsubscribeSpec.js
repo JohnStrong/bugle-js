@@ -5,7 +5,7 @@ describe('unsubscribe', function() {
 
 	var TEST_NAMESPACE = 'unsubTest',
 
-	UNSUB_ERROR_MSG = 'USAGE [topic:String, reference:Subscriber]',
+	UNSUB_ERROR_MSG = 'USAGE [ topic:String, instance:Subscriber ]',
 
 	ASYNC_WAIT = 10,
 

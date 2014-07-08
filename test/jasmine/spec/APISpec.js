@@ -3,7 +3,7 @@ describe('api', function() {
 
 	var bugle,
 
-	NOT_OBJECT_ERROR = 'argument to Bugle extend must be a literal object',
+	NOT_OBJECT_ERROR = 'argument to Bugle extend must be an object literal',
 
 	methods = {
 		'_constructor': function() { },

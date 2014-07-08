@@ -5,7 +5,7 @@ describe('subscribe', function() {
 
 	var TEST_NAMESPACE = 'subTest',
 
-	SUB_ERROR_MSG = 'USAGE [ topic:String, object:Object, toCall:String ]',
+	SUB_ERROR_MSG = 'USAGE [ topic:String, scope:Object ]',
 
 	bugle, topicHandle;
 

@@ -10,7 +10,7 @@ describe('publish', function() {
 	ASYNC_WAIT = 10,
 	BUILD_QTY = 100,
 
-	PUB_ERROR_MSG = 'UASGE [ topic:String[, data1:Any[, data2:Any[, ..]]] ]',
+	PUB_ERROR_MSG = 'UASGE [ topic:String[, message1:Any[, message2:Any[, ..]]] ]',
 
 	// test state
 	bugle, pubTest;
