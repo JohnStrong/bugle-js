@@ -102,11 +102,11 @@
 		});
 			
 		// unsub reference
-		//extendedBugle.unsub('cause', reference);
+		extendedBugle.input([5,4,3,1], [1,2]);
 
 		// publish to reference1
 		setTimeout(function() {
-			extendedBugle.input([5,4,3,1],[1,2]);
+			extendedBugle.unsub('cause', reference);
 		}, 1000);
 		
 		
