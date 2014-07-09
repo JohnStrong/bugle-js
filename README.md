@@ -46,7 +46,7 @@ var bugleSkeleton = {
 	'_constructor': function() { }
 }
 ```
-Note the ``'_constructor'`` function, this act likes like a traditional constructor often seen in many OOP
+Note the ``'_constructor'`` function, this acts like a traditional constructor often seen in many OOP
 languages (Java, C#). Whatever initial state you give to Bugle will be passed to this function. In this example we are not initializing our object with any state.
 
 Now we have to extend this object with Bugle and execute it.
