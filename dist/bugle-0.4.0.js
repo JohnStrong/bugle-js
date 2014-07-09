@@ -1,3 +1,6 @@
+/**
+ *	Bugle-js v0.4.0 => event-driven publish-subscribe javascript api
+ **/
 ;(function (module) {
 
 	'use strict';
