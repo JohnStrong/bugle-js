@@ -19,7 +19,7 @@ This serves to free up a project's main event loop resulting in a responsive sys
 
 ##Install
 
-<b>Status</b>: v0.1.0 (unstable).
+<b>Status</b>: v0.4.0 (unstable).
 
 At the time of writing, Bugle-js is 'pre-release', that said, pre-release distributions can be found in ``dist/``.
 
@@ -53,24 +53,31 @@ Now we have to extend this object with Bugle and execute it.
 ```javascript
 var myCustomBugle = Bugle.extend(bugleSkeleton)();
 ```
-Next we will subscribe an anonymous function to our bugle instance.
+Next we will create a ``Subscriber`` instance for a topic, ``'demo'``.
+
 ```javascript
-var objectId = myCustomBugle.sub('demo', function(data) {
+var subscriber = myCustomBugle.sub('demo');
+```
+
+We want to be able to handle any incoming messages on ``'demo'``, to do this we attach a receive handler to our subscriber.
+
+```javascript
+subscriber.receive(function(data) {
 	console.log(data);
 });
 ```
-Bugle keeps track of all functions subscribed to topics by generating a unique object id. The object id for our function is returned after calling ``myCustomBugle.sub``. ``'demo'`` is the name of the topic we are subscribing our function to.
-
-When a message is passed to ``'demo'`` our newly subscribed function will be triggered with the message value.
+When a message is passed to ``'demo'`` our newly subscribed function's receive handler will be triggered with the message value.
 Lets try this out by publishing some data to our function.
 
 We can publish a message from within our global scope.
+
 ```javascript
 myCustomBugle.pub('demo', [1,2,3,4]);
 ```
 This will print ``[1,2,3,4]`` to our console.
 
-Alternatively, we can publish a message from within our extended Bugle object. Lets test this by adding a method to ``bugleSkeleton``.
+Alternatively, we can publish a message from within our extended Bugle object. 
+Lets test this by adding a method to ``bugleSkeleton``.
 
 ```javascript
 var bugleSkeleton = {
@@ -83,13 +90,49 @@ var bugleSkeleton = {
 ```
 Now if we call ``myCustomBugle.pubTest()`` our program will print ``'isnt this fun!?'``.
 
-We can unsubscribe our listener function from ``'demo'`` by calling `unsub`, passing it the topic name and a valid object id.
-```javascript
-myCustomBugle.unsub('demo', objectId);
-```
-This will remove our function from the ``'demo'`` topic. Any messages passed to this topic from then on will not trigger our function.
+we can unsubscribe any subscriber instance by calling `unsub`, passing it a topic name and a ``Subscriber`` instance.
 
-Check out ``examples/`` for more usage examples.
+Lets try this in our demo.
+
+```javascript
+myCustomBugle.unsub('demo', subscriber);
+```
+
+This will remove ``subscriber`` from the ``'demo'`` topic, no longer will it receive incoming messages.
+
+##Functional Features
+Take our previous example, it is lovely and all, but what if we would like our subscribers to manipulate/filter incoming messages before eventually using them.
+
+For this, Bugle-js supports a number of HOFs (Higher Order Functions) out of the box. 
+Such as
+* ``map``
+* ``filter``
+* ``reject``
+* ``flatMap``
+* ``squash (join)``
+
+To try these out lets create a new ``Subscriber`` instance and attach some HOF handlers.
+
+```javascript
+var subscriber = myCustomBugle.sub('demo');
+
+subscriber.map(function(message) {
+	return message.concat(5,6,7);
+}).reject(function(message) {
+	return message.length > 5;
+}).receive(function(message) {
+	console.log('equals [1,2,5,6,7]', message);
+});
+```
+It would be pretty pointless using all these functions where we are only expecting 1 message at a time, but what about when we want to publish multiple messages at the same time? For example.
+
+```javascript
+myCustomBugle.pub('demo', [5,4,3,1],[1,2]);
+```
+When this code is executed, all subscribers of the topic ``'demo'`` will receive 2 messages (``[5,4,3,2,1]``, ``[1,2]``). 
+Before eventually handling our message(s) in ``receive``, we ``map`` over each message, concatenating ``[5,6,7]`` to each and ``reject`` any message which has a length greater than 5.
+
+In our example, the final output is ``"equals [1,2,5,6,7]" [1,2,5,6,7]``.
 
 ##License
 

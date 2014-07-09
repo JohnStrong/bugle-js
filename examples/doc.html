@@ -17,14 +17,14 @@
 
 	var myCustomBugle = Bugle.extend(bugleSkeleton)();
 
-	var objectId = myCustomBugle.sub('demo', function(data) {
+	var subscriber = myCustomBugle.sub('demo').receive(function(data) {
 		console.log(data);
 	});
 
 	myCustomBugle.pub('demo', [1,2,3,4]);
 	myCustomBugle.pubTest();
 	
-	myCustomBugle.unsub('demo', objectId);
+	myCustomBugle.unsub('demo', subscriber);
 	</script>
 </body>
 </html>

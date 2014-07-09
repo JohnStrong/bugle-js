@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Bugle-js HOF demo</title>
+	<script src="./../lib/bugle.js"></script>
+</head>
+<body>
+	<script>
+	var bugleSkeleton = {
+		'_constructor': function() { }
+	};
+
+	var myCustomBugle = Bugle.extend(bugleSkeleton)();
+
+	var subscriber = myCustomBugle.sub('demo');
+
+	subscriber.map(function(message) {
+		return message.concat(5,6,7);
+	}).reject(function(message) {
+		return message.length > 5;
+	}).receive(function(message) {
+		console.log('equals [1,2,5,6,7]', message);
+	});
+
+	myCustomBugle.pub('demo', [5,4,3,1],[1,2]);
+	myCustomBugle.unsub('demo', subscriber);
+	</script>
+</body>
+</html>
