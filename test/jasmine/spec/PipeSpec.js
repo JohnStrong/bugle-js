@@ -32,6 +32,8 @@ describe('pipe', function() {
 			scopes.push(this); return msg;
 		}).filter(function(msg) {
 			scopes.push(this); return msg;
+		}).reject(function(msg) {
+			scopes.push(this); return false;
 		}).flatMap(function(msg) {
 			scopes.push(this); return [msg, msg];
 		}).receive(function() {
@@ -68,6 +70,7 @@ describe('pipe', function() {
 
 		expect(subscriber.map).toBeDefined();
 		expect(subscriber.filter).toBeDefined();
+		expect(subscriber.reject).toBeDefined();
 		expect(subscriber.flatMap).toBeDefined();
 		expect(subscriber.squash).toBeDefined();
 		expect(subscriber.receive).toBeDefined();
@@ -95,12 +98,33 @@ describe('pipe', function() {
 		expect(state[1]).toEqual([3,2,1,4,5,6]);
 	});
 
-	it('can filter over incoming publish messages', function() {
+	it('can filter incoming publish messages', function() {
 
 		var subscriber = genSubscriber();
 
 		subscriber.filter(function(message) {
 			return message[0] !== 1;
+		}).receive(function(message1, message2) {
+			state.push(message1);
+			state.push(message2);
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state[0]).toBeDefined();
+		expect(state[0]).toEqual([3,2,1]);
+
+		expect(state[1]).not.toBeDefined();
+	});
+
+	it('can reject incoming publish messages', function() {
+
+		var subscriber = genSubscriber();
+
+		subscriber.reject(function(message) {
+			return message[0] === 1;
 		}).receive(function(message1, message2) {
 			state.push(message1);
 			state.push(message2);
@@ -162,6 +186,7 @@ describe('pipe', function() {
 
 		subscriber.map(function(msg) { return msg; })
 		.filter(function(msg) { return msg[0] !== 1; })
+		.reject(function(msg) { return msg[0] === 1; })
 		.flatMap(function(msg) { return [msg, msg]; })
 		.squash().receive(function(msg1, msg2) {
 			state.push(msg1);
