@@ -11,6 +11,16 @@ describe('pipe', function() {
 	PUBLISH_ARRAY_MSG1 = [1,2,3],
 	PUBLISH_ARRAY_MSG2 = [3,2,1],
 
+	PUBLISH_OBJECT_MSG1 = {
+		'name': 'John Doe',
+		'age': 18
+	},
+
+	PUBLISH_OBJECT_MSG2 = {
+		'name': 'Jane Doe',
+		'age': 21
+	},
+
 	genSubscriber = function(scope) {
 		return bugle.sub(TEST_NAMESPACE, scope? scope: undefined);
 	},
@@ -61,28 +71,6 @@ describe('pipe', function() {
 		expect(subscriber.flatMap).toBeDefined();
 		expect(subscriber.squash).toBeDefined();
 		expect(subscriber.receive).toBeDefined();
-	});
-
-	it('can chain hofs over published messages', function() {
-		
-		var subscriber = genSubscriber();
-
-		subscriber.map(function(msg) { return msg; })
-		.filter(function(msg) { return msg[0] !== 1; })
-		.flatMap(function(msg) { return [msg, msg]; })
-		.squash().receive(function(msg1, msg2) {
-			state.push(msg1);
-			state.push(msg2);
-		});
-
-		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
-
-		tick(ASYNC_WAIT);
-
-		expect(state[0]).toBeDefined();
-		expect(state[0]).toEqual([3,2,1,3,2,1]);
-
-		expect(state[1]).not.toBeDefined();
 	});
 
 	it('can map over incoming publish messages', function() {
@@ -168,7 +156,29 @@ describe('pipe', function() {
 
 	});
 
-	it('carry subscriber scope over its hof chain', function() {
+	it('can chain hofs over published messages', function() {
+		
+		var subscriber = genSubscriber();
+
+		subscriber.map(function(msg) { return msg; })
+		.filter(function(msg) { return msg[0] !== 1; })
+		.flatMap(function(msg) { return [msg, msg]; })
+		.squash().receive(function(msg1, msg2) {
+			state.push(msg1);
+			state.push(msg2);
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state[0]).toBeDefined();
+		expect(state[0]).toEqual([3,2,1,3,2,1]);
+
+		expect(state[1]).not.toBeDefined();
+	});
+
+	it('can carry subscriber scope over its hof chain', function() {
 
 		var subscriber = genSubscriber(),
 		them = persistScope(subscriber);
@@ -220,5 +230,29 @@ describe('pipe', function() {
 		});
 
 		expect(maybeChain).not.toBeDefined();
+	});
+
+	it('can run object messages over chained functions', function() {
+		var subscriber = genSubscriber(),
+
+		johnDesc, janeDesc;
+
+		subscriber.map(function(msg1) {
+			return ''.concat(msg1.name, ': ', msg1.age, '.');
+		}).receive(function(msg1, msg2) {
+			johnDesc = msg1;
+			janeDesc = msg2;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+
+		expect(johnDesc).toBeDefined();
+		expect(johnDesc).toBe('John Doe: 18.');
+
+		expect(janeDesc).toBeDefined();
+		expect(janeDesc).toBe('Jane Doe: 21.');
 	});
 });
