@@ -52,7 +52,7 @@ describe('subscribe', function() {
 		try {
 			bugle.sub(null);
 		} catch(e) {
-			expect(e).toBe(SUB_ERROR_MSG);
+			expect(e.message).toBe(SUB_ERROR_MSG);
 		}
 	});
 

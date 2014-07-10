@@ -51,7 +51,7 @@ describe('publish', function() {
 		try {
 			bugle.pub(null, [])
 		} catch(e) {
-			expect(e).toBe(PUB_ERROR_MSG);
+			expect(e.message).toBe(PUB_ERROR_MSG);
 		} 
 	});
 

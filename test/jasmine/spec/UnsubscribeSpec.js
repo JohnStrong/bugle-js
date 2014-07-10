@@ -38,7 +38,7 @@ describe('unsubscribe', function() {
 			bugle.unsub(null, reference)
 			tick();
 		} catch(e) {
-			expect(e).toBe(UNSUB_ERROR_MSG);
+			expect(e.message).toBe(UNSUB_ERROR_MSG);
 		}
 	});
 
@@ -49,7 +49,7 @@ describe('unsubscribe', function() {
 			bugle.unsub(TEST_NAMESPACE, '1');
 			tick();
 		} catch(e) {
-			expect(e).toBe(UNSUB_ERROR_MSG);
+			expect(e.message).toBe(UNSUB_ERROR_MSG);
 		}
 	});
 
@@ -61,7 +61,7 @@ describe('unsubscribe', function() {
 			bugle.unsub(TEST_NAMESPACE);
 			tick();
 		} catch(e) {
-			expect(e).toBe(UNSUB_ERROR_MSG);
+			expect(e.message).toBe(UNSUB_ERROR_MSG);
 		}
 	});
 

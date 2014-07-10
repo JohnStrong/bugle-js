@@ -23,13 +23,14 @@ describe('api', function() {
 		try {
 			bugle();
 		} catch (e) {
-			expect(e).toBe(NOT_OBJECT_ERROR);
+			expect(e.message).toBe(NOT_OBJECT_ERROR);
 		}
 
 		try {
 			bugle({})
 		} catch (e) {
-			expect(e).toBe(NOT_OBJECT_ERROR);
+			console.log(e.message);
+			expect(e.message).toBe(NOT_OBJECT_ERROR);
 		}
 
 		expect(bugle(methods)).toBeDefined();
