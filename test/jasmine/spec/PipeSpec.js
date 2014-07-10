@@ -106,10 +106,9 @@ describe('pipe', function() {
 		var subscriber = genSubscriber();
 
 		subscriber.filter(function(message) {
-			return message[0] !== 1;
-		}).receive(function(message1, message2) {
+			return message[0] !== 1 && message[2] !== 3;
+		}).receive(function(message1) {
 			state.push(message1);
-			state.push(message2);
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
@@ -118,8 +117,6 @@ describe('pipe', function() {
 
 		expect(state[0]).toBeDefined();
 		expect(state[0]).toEqual([3,2,1]);
-
-		expect(state[1]).not.toBeDefined();
 	});
 
 	it('can reject incoming publish messages', function() {
