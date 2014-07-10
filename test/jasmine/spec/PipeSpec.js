@@ -162,12 +162,35 @@ describe('pipe', function() {
 		expect(state[0]).toEqual(expectedOutput);
 	});
 
-	it('can reduce over incoming messages', function() {
+	it('can reduce over incoming messages with accumulator value', function() {
 
 		var subscriber = genSubscriber(),
 
 		partialArray = [5],
 		maybeResult = [5,1,2,3,5,3,2,1];
+
+		subscriber.reduce(function(message, iter) {
+			return iter.concat(partialArray.concat(message));
+		}, [])
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduce over incoming messages WITHOUT accumulator value', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = [1,2,3,5,1,2,3,5,3,2,1];
 
 		subscriber.reduce(function(message, iter) {
 			return iter.concat(partialArray.concat(message));
@@ -185,12 +208,35 @@ describe('pipe', function() {
 
 	});
 
-	it('can reduce right over incoming messages', function() {
+	it('can reduce right over incoming messages with accumulator value', function() {
 
 		var subscriber = genSubscriber(),
 
 		partialArray = [5],
 		maybeResult = [5,3,2,1,5,1,2,3];
+
+		subscriber.reduceRight(function(message, iter) {
+			return iter.concat(partialArray.concat(message));
+		}, [])
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduce right over incoming messages WITHOUT accumulator value', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = [3,2,1,5,3,2,1,5,1,2,3]
 
 		subscriber.reduceRight(function(message, iter) {
 			return iter.concat(partialArray.concat(message));

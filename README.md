@@ -103,13 +103,15 @@ This will remove ``subscriber`` from the ``'demo'`` topic, no longer will it rec
 ##Functional Features
 Take our previous example, it is lovely and all, but what if we would like our subscribers to manipulate/filter incoming messages before eventually using them.
 
-For this, Bugle-js supports a number of HOFs (Higher Order Functions) out of the box. 
-Such as
-* ``map``
-* ``filter``
-* ``reject``
-* ``flatMap``
-* ``squash (join)``
+For this, Bugle-js supports a number of helper functions out of the box. 
+Such as:
+* ``map`` := returns a new sequence of messages produced by mapping each message over a supplied transformation function
+* ``filter`` := returns a subset of messages that passed a given predicate function
+* ``reject`` := returns a subset of messages that failed to satisfy a given predicate function
+* ``flatMap`` := returns a sequence for each message and flattens them into a single sequence
+* ``reduce`` := flattens a sequence into a single value using the supplied function and accumulator value
+* ``reduceRight`` := same as above but from right to left
+* ``squash (join)`` := flattens messages together into a single sequence
 
 To try these out lets create a new ``Subscriber`` instance and attach some HOF handlers.
 

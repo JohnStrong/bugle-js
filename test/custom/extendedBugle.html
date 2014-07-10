@@ -96,12 +96,12 @@
 		// pipe events...
 		reference1.reduceRight(function(message, acc) {
 			return acc.concat(message);
-		}).receive(function(msg) {
+		}, []).receive(function(msg) {
 			console.log('[1,2,5,4,3,2,1]', msg);
 		});
 			
 		// unsub reference
-		extendedBugle.input([5,4,3,1], [1,2]);
+		extendedBugle.input([5,4,3,2,1], [1,2]);
 
 		// publish to reference1
 		setTimeout(function() {
