@@ -1,6 +1,5 @@
-// alias given to the feature which allows users to map,filter,flatMap,etc. over pub messages
 // NOTE: many of these tests will change and become more comprehensive
-describe('pipe', function() {
+describe('subscriber', function() {
 
 	'use strict';
 	
