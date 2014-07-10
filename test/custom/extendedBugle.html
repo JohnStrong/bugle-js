@@ -58,9 +58,8 @@
 			this.state = state;
 		};
 
-		Environment1.prototype.store = function(data) {
-			console.log('data called', data);
-			this.state = data;
+		Environment1.prototype.store = function(msgs) {
+			this.state = msgs[0];
 		};
 
 		// we can extended an object with custom properties

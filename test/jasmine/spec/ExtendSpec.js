@@ -37,7 +37,7 @@ describe('extend', function() {
 			'_constructor': function() {
 				this.sub(TOPIC_NAMESPACE)
 				.receive(function(data) {
-					globalState = data;
+					globalState = data[0];
 				});
 			}
 		})(),
@@ -80,7 +80,7 @@ describe('extend', function() {
 		constructor = function() {
 			this.sub(TOPIC_NAMESPACE)
 			.receive(function(data) {
-				globalState = globalState.concat(data);
+				globalState = globalState.concat(data[0]);
 			});
 		},
 
@@ -113,7 +113,7 @@ describe('extend', function() {
 		child = util.extend(parent, function() {
 			this.sub(TOPIC_NAMESPACE)
 			.receive(function(msg) {
-				globalState = msg;
+				globalState = msg[0];
 			});
 		})();
 

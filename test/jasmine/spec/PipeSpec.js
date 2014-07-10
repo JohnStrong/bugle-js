@@ -37,6 +37,10 @@ describe('pipe', function() {
 			scopes.push(this); return false;
 		}).flatMap(function(msg) {
 			scopes.push(this); return [msg, msg];
+		}).reduce(function(msg) {
+			scopes.push(this); return [msg];
+		}).reduceRight(function(msg) {
+			scopes.push(this); return [msg];
 		}).receive(function() {
 			scopes.push(this);
 		});
@@ -85,9 +89,9 @@ describe('pipe', function() {
 
 		subscriber.map(function(message) {
 			return message.concat([4,5,6]);
-		}).receive(function(message1, message2) {
-			state.push(message1);
-			state.push(message2);
+		}).receive(function(messages) {
+			state.push(messages[0]);
+			state.push(messages[1]);
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
@@ -107,8 +111,9 @@ describe('pipe', function() {
 
 		subscriber.filter(function(message) {
 			return message[0] !== 1 && message[2] !== 3;
-		}).receive(function(message1) {
-			state.push(message1);
+		}).receive(function(messages) {
+			state.push(messages[0]);
+			state.push(messages[1]);
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
@@ -117,6 +122,8 @@ describe('pipe', function() {
 
 		expect(state[0]).toBeDefined();
 		expect(state[0]).toEqual([3,2,1]);
+
+		expect(state[1]).not.toBeDefined();
 	});
 
 	it('can reject incoming publish messages', function() {
@@ -125,9 +132,9 @@ describe('pipe', function() {
 
 		subscriber.reject(function(message) {
 			return message[0] === 1;
-		}).receive(function(message1, message2) {
-			state.push(message1);
-			state.push(message2);
+		}).receive(function(messages) {
+			state.push(messages[0]);
+			state.push(messages[1]);
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
@@ -277,9 +284,8 @@ describe('pipe', function() {
 		.filter(function(msg) { return msg[0] !== 1; })
 		.reject(function(msg) { return msg[0] === 1; })
 		.flatMap(function(msg) { return [msg, msg]; })
-		.squash().receive(function(msg1, msg2) {
-			state.push(msg1);
-			state.push(msg2);
+		.squash().receive(function(msg) {
+			state.push(msg);
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
@@ -288,8 +294,6 @@ describe('pipe', function() {
 
 		expect(state[0]).toBeDefined();
 		expect(state[0]).toEqual([3,2,1,3,2,1]);
-
-		expect(state[1]).not.toBeDefined();
 	});
 
 	it('can carry subscriber scope over its hof chain', function() {
@@ -353,9 +357,9 @@ describe('pipe', function() {
 
 		subscriber.map(function(msg1) {
 			return ''.concat(msg1.name, ': ', msg1.age, '.');
-		}).receive(function(msg1, msg2) {
-			johnDesc = msg1;
-			janeDesc = msg2;
+		}).receive(function(msgs) {
+			johnDesc = msgs[0];
+			janeDesc = msgs[1];
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);

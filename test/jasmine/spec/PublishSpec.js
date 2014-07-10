@@ -29,8 +29,8 @@ describe('publish', function() {
 			
 			state: [],
 
-			handler: function(data) { 
-				this.state = this.state.concat(data); 
+			handler: function(msgs) { 
+				this.state = this.state.concat(msgs[0]); 
 			}
 		};
 	});
@@ -60,7 +60,7 @@ describe('publish', function() {
 		var syncStr = 'sync', asyncStr = 'async';
 
 		spyOn(pubTest, 'handler').and.callFake(function(str) {
-			syncStr = str;
+			syncStr = str[0];
 		});
 
 		var ref = bugle.sub(TEST_NAMESPACE, pubTest);
@@ -86,7 +86,7 @@ describe('publish', function() {
 		spyOn(pubTest, 'handler').and.callThrough();
 
 		// build 100 pubTest, subscribe each
-		var testNum = 1,
+		var test = [1],
 
 		refs = util.build(BUILD_QTY, pubTest).map(function(obj) {
 			return bugle.sub(TEST_NAMESPACE, obj);
@@ -99,11 +99,11 @@ describe('publish', function() {
 		});
 
 		// publish to the topic namespace
-		bugle.pub(TEST_NAMESPACE, testNum);
+		bugle.pub(TEST_NAMESPACE, 1);
 
 		tick(ASYNC_WAIT);
 
-		expect(pubTest.handler).toHaveBeenCalledWith(testNum);
+		expect(pubTest.handler).toHaveBeenCalledWith(test);
 		expect(util.sum(pubTest.state)).toEqual(BUILD_QTY);
 	});
 
@@ -161,7 +161,7 @@ describe('publish', function() {
 		
 		tick(ASYNC_WAIT);
 
-		expect(state).not.toBeDefined();
+		expect(state[0]).not.toBeDefined();
 	});
 
 });

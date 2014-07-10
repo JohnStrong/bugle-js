@@ -22,9 +22,9 @@ describe('subscribe', function() {
 				return this.sub(TEST_NAMESPACE);
 			},
 
-			'update': function(a, b) {
-				this.a = a;
-				this.b = b;
+			'update': function(msgs) {
+				this.a = msgs[0];
+				this.b = msgs[1];
 			}
 
 		})(1,2);
@@ -100,9 +100,9 @@ describe('subscribe', function() {
 	it('can subscribe with a custom scope', function() {
 		var ref = bugle.sub(TEST_NAMESPACE, bugle);
 
-		ref.receive(function(data1, data2) {
-			this.a = data1;
-			this.b = data2;
+		ref.receive(function(msgs) {
+			this.a = msgs[0];
+			this.b = msgs[1];
 		});
 
 		bugle.pub(TEST_NAMESPACE, 'a', 'b');

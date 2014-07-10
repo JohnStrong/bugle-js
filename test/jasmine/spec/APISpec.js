@@ -29,7 +29,6 @@ describe('api', function() {
 		try {
 			bugle({})
 		} catch (e) {
-			console.log(e.message);
 			expect(e.message).toBe(NOT_OBJECT_ERROR);
 		}
 
