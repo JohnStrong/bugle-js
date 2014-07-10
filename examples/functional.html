@@ -19,8 +19,8 @@
 		return message.concat(5,6,7);
 	}).reject(function(message) {
 		return message.length > 5;
-	}).receive(function(message) {
-		console.log('equals [1,2,5,6,7]', message);
+	}).receive(function(messages) {
+		console.log('equals [1,2,5,6,7]', messages[0]);
 	});
 
 	myCustomBugle.pub('demo', [5,4,3,1],[1,2]);

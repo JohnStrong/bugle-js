@@ -63,10 +63,11 @@ We want to be able to handle any incoming messages on ``'demo'``, to do this we 
 
 ```javascript
 subscriber.receive(function(data) {
-	console.log(data);
+	// receive passes an array containing our message, more on this later
+	console.log(data[0]);
 });
 ```
-When a message is passed to ``'demo'`` our newly subscribed function's receive handler will be triggered with the message value.
+When a message is passed to ``'demo'`` our newly subscribed function's receive handler will be triggered with that message.
 Lets try this out by publishing some data to our function.
 
 We can publish a message from within our global scope.
@@ -122,8 +123,8 @@ subscriber.map(function(message) {
 	return message.concat(5,6,7);
 }).reject(function(message) {
 	return message.length > 5;
-}).receive(function(message) {
-	console.log('equals [1,2,5,6,7]', message);
+}).receive(function(messages) {
+	console.log('equals [1,2,5,6,7]', messages[0]);
 });
 ```
 It would be pretty pointless using all these functions where we are only expecting 1 message at a time, but what about when we want to publish multiple messages at the same time? For example.
@@ -132,7 +133,11 @@ It would be pretty pointless using all these functions where we are only expecti
 myCustomBugle.pub('demo', [5,4,3,1],[1,2]);
 ```
 When this code is executed, all subscribers of the topic ``'demo'`` will receive 2 messages (``[5,4,3,2,1]``, ``[1,2]``). 
-Before eventually handling our message(s) in ``receive``, we ``map`` over each message, concatenating ``[5,6,7]`` to each and ``reject`` any message which has a length greater than 5.
+Before eventually handling our message(s) in ``receive``, we ``map`` over each message, concatenating ``[5,6,7]`` to each, and ``reject`` any message which has a length greater than 5.
+
+After each message flows through our transformation functions, the receive handler is called with an array of the remaining messages.
+
+To print the result of our first remaining message (``[1,2]``) we must get the zeroth index of our ``messages`` array (apply this logic similarly for all n remaining messages).
 
 In our example, the final output is ``"equals [1,2,5,6,7]" [1,2,5,6,7]``.
 

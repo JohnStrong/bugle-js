@@ -18,7 +18,7 @@
 	var myCustomBugle = Bugle.extend(bugleSkeleton)();
 
 	var subscriber = myCustomBugle.sub('demo').receive(function(data) {
-		console.log(data);
+		console.log(data[0]);
 	});
 
 	myCustomBugle.pub('demo', [1,2,3,4]);
