@@ -93,12 +93,11 @@
 			return message.length > 5;
 		}).receive(environment1.store);
 
-		// pipe events... flatMap over
-		reference1.flatMap(function(message) {
-			return [message, [4,5,6]];
-		}).receive(function(msg1, msg2) {
-			console.log('[5,4,3,2,1,4,5,6]', msg1);
-			console.log('[1,2,4,5,6]', msg2);
+		// pipe events...
+		reference1.reduceRight(function(message, acc) {
+			return acc.concat(message);
+		}).receive(function(msg) {
+			console.log('[1,2,5,4,3,2,1]', msg);
 		});
 			
 		// unsub reference

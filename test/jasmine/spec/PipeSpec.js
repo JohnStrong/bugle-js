@@ -1,4 +1,5 @@
-// alais given to the feature which allows users to map,filter,flatMap,etc. over pub messages
+// alias given to the feature which allows users to map,filter,flatMap,etc. over pub messages
+// NOTE: many of these tests will change and become more comprehensive
 describe('pipe', function() {
 
 	'use strict';
@@ -72,6 +73,8 @@ describe('pipe', function() {
 		expect(subscriber.filter).toBeDefined();
 		expect(subscriber.reject).toBeDefined();
 		expect(subscriber.flatMap).toBeDefined();
+		expect(subscriber.reduce).toBeDefined();
+		expect(subscriber.reduceRight).toBeDefined();
 		expect(subscriber.squash).toBeDefined();
 		expect(subscriber.receive).toBeDefined();
 	});
@@ -142,13 +145,13 @@ describe('pipe', function() {
 
 	it('can flatMap over incoming publish messages', function() {
 
-		var subscriber = genSubscriber();
+		var subscriber = genSubscriber(),
+		expectedOutput = [1,2,3,5,4,3,3,2,1,5,4,3];
 
 		subscriber.flatMap(function(message) {
 			return [message, [5,4,3]];
-		}).receive(function(message1, message2) {
-			state.push(message1);
-			state.push(message2);
+		}).receive(function(flattenMessages) {
+			state.push(flattenMessages);
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
@@ -156,10 +159,53 @@ describe('pipe', function() {
 		tick(ASYNC_WAIT);
 
 		expect(state[0]).toBeDefined();
-		expect(state[0]).toEqual([1,2,3,5,4,3]);
+		expect(state[0]).toEqual(expectedOutput);
+	});
 
-		expect(state[1]).toBeDefined();
-		expect(state[1]).toEqual([3,2,1,5,4,3]);
+	it('can reduce over incoming messages', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = [5,1,2,3,5,3,2,1];
+
+		subscriber.reduce(function(message, iter) {
+			return iter.concat(partialArray.concat(message));
+		})
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduce right over incoming messages', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = [5,3,2,1,5,1,2,3];
+
+		subscriber.reduceRight(function(message, iter) {
+			return iter.concat(partialArray.concat(message));
+		})
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
 	});
 
 	it('can squash incoming messages into one message', function() {
