@@ -1,4 +1,4 @@
-// NOTE: many of these tests will change and become more comprehensive
+// large refractoring needs to be done
 describe('subscriber', function() {
 
 	'use strict';
@@ -6,6 +6,7 @@ describe('subscriber', function() {
 	var bugle, state,
 
 	TEST_NAMESPACE = 'pipe',
+
 	ASYNC_WAIT = 10,
 
 	PUBLISH_ARRAY_MSG1 = [1,2,3],
@@ -40,12 +41,12 @@ describe('subscriber', function() {
 			scopes.push(this); return [msg];
 		}).reduceRight(function(msg) {
 			scopes.push(this); return [msg];
-		}).receive(function() {
+		}).squash().receive(function() {
 			scopes.push(this);
 		});
 
 		return scopes;
-	}
+	};
 
 	beforeEach(function() {
 		
@@ -82,7 +83,7 @@ describe('subscriber', function() {
 		expect(subscriber.receive).toBeDefined();
 	});
 
-	it('can map over incoming publish messages', function() {
+	it('can map over array messages', function() {
 
 		var subscriber = genSubscriber();
 
@@ -104,7 +105,29 @@ describe('subscriber', function() {
 		expect(state[1]).toEqual([3,2,1,4,5,6]);
 	});
 
-	it('can filter incoming publish messages', function() {
+	it('can map over object messages', function() {
+
+		var subscriber = genSubscriber();
+
+		subscriber.map(function(message) {
+			return message.name.toUpperCase();
+		}).receive(function(messages) {
+			state.push(messages[0]);
+			state.push(messages[1]);
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state[0]).toBeDefined();
+		expect(state[0]).toEqual('JOHN DOE');
+
+		expect(state[1]).toBeDefined();
+		expect(state[1]).toEqual('JANE DOE');
+	});
+
+	it('can filter on array messages', function() {
 
 		var subscriber = genSubscriber();
 
@@ -125,7 +148,28 @@ describe('subscriber', function() {
 		expect(state[1]).not.toBeDefined();
 	});
 
-	it('can reject incoming publish messages', function() {
+	it('can filter on object messages', function() {
+
+		var subscriber = genSubscriber();
+
+		subscriber.filter(function(message) {
+			return message.name === 'John Doe';
+		}).receive(function(messages) {
+			state.push(messages[0]);
+			state.push(messages[1]);
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state[0]).toBeDefined();
+		expect(state[0].name).toEqual('John Doe');
+
+		expect(state[1]).not.toBeDefined();
+	});
+
+	it('can reject messages', function() {
 
 		var subscriber = genSubscriber();
 
@@ -146,7 +190,7 @@ describe('subscriber', function() {
 		expect(state[1]).not.toBeDefined();
 	});
 
-	it('can flatMap over incoming publish messages', function() {
+	it('can flatMap over array messages', function() {
 
 		var subscriber = genSubscriber(),
 		expectedOutput = [1,2,3,5,4,3,3,2,1,5,4,3];
@@ -165,7 +209,29 @@ describe('subscriber', function() {
 		expect(state[0]).toEqual(expectedOutput);
 	});
 
-	it('can reduce over incoming messages with accumulator value', function() {
+	it('can flatMap over object messages', function() {
+
+		var subscriber = genSubscriber(),
+		expectedOutput = [
+			'name', 'age', PUBLISH_OBJECT_MSG1,
+			'name', 'age', PUBLISH_OBJECT_MSG2
+		];
+
+		subscriber.flatMap(function(message) {
+			return [Object.keys(message), [message]];
+		}).receive(function(flattenedMessage) {
+			state.push(flattenedMessage);
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state[0]).toBeDefined();
+		expect(state[0]).toEqual(expectedOutput);
+	});
+
+	it('can reduce over array messages with accumulator value', function() {
 
 		var subscriber = genSubscriber(),
 
@@ -174,7 +240,7 @@ describe('subscriber', function() {
 
 		subscriber.reduce(function(message, iter) {
 			return iter.concat(partialArray.concat(message));
-		}, [])
+		}, /* acc value */ [])
 		.receive(function(message) {
 			state = message;
 		});
@@ -188,12 +254,12 @@ describe('subscriber', function() {
 
 	});
 
-	it('can reduce over incoming messages WITHOUT accumulator value', function() {
+	it('can reduce over array messages WITHOUT accumulator value', function() {
 
 		var subscriber = genSubscriber(),
 
 		partialArray = [5],
-		maybeResult = [1,2,3,5,1,2,3,5,3,2,1];
+		maybeResult = [1,2,3,5,3,2,1];
 
 		subscriber.reduce(function(message, iter) {
 			return iter.concat(partialArray.concat(message));
@@ -211,7 +277,53 @@ describe('subscriber', function() {
 
 	});
 
-	it('can reduce right over incoming messages with accumulator value', function() {
+	it('can reduce over object messages with accumulator value', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = ['John Doe', 18, 'Jane Doe', 21];
+
+		subscriber.reduce(function(message, iter) {
+			return iter.concat([message.name, message.age]);
+		}, /* acc value */ [])
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduce over object messages WITHOUT accumulator value', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = -3;
+
+		subscriber.reduce(function(message, iter) {
+			return iter.age - message.age;
+		})
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduceRight over array messages with accumulator value', function() {
 
 		var subscriber = genSubscriber(),
 
@@ -220,7 +332,7 @@ describe('subscriber', function() {
 
 		subscriber.reduceRight(function(message, iter) {
 			return iter.concat(partialArray.concat(message));
-		}, [])
+		}, /* acc value */ [])
 		.receive(function(message) {
 			state = message;
 		});
@@ -234,12 +346,12 @@ describe('subscriber', function() {
 
 	});
 
-	it('can reduce right over incoming messages WITHOUT accumulator value', function() {
+	it('can reduceRight over array messages WITHOUT accumulator value', function() {
 
 		var subscriber = genSubscriber(),
 
 		partialArray = [5],
-		maybeResult = [3,2,1,5,3,2,1,5,1,2,3]
+		maybeResult = [3,2,1,5,1,2,3]
 
 		subscriber.reduceRight(function(message, iter) {
 			return iter.concat(partialArray.concat(message));
@@ -249,6 +361,52 @@ describe('subscriber', function() {
 		});
 
 		bugle.pub(TEST_NAMESPACE, PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduceRight over object messages with accumulator value', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = 61;
+
+		subscriber.reduce(function(message, iter) {
+			return iter - message.age;
+		}, /* acc value */ 100)
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+
+		tick(ASYNC_WAIT);
+
+		expect(state).toBeDefined();
+		expect(state).toEqual(maybeResult);
+
+	});
+
+	it('can reduceRight over object messages with accumulator value', function() {
+
+		var subscriber = genSubscriber(),
+
+		partialArray = [5],
+		maybeResult = 3;
+
+		subscriber.reduceRight(function(message, iter) {
+			return iter.age - message.age;
+		})
+		.receive(function(message) {
+			state = message;
+		});
+
+		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
 
 		tick(ASYNC_WAIT);
 
@@ -277,7 +435,9 @@ describe('subscriber', function() {
 
 	it('can chain hofs over published messages', function() {
 		
-		var subscriber = genSubscriber();
+		var subscriber = genSubscriber(),
+
+		maybeResult = [3,2,1,3,2,1];
 
 		subscriber.map(function(msg) { return msg; })
 		.filter(function(msg) { return msg[0] !== 1; })
@@ -292,7 +452,7 @@ describe('subscriber', function() {
 		tick(ASYNC_WAIT);
 
 		expect(state[0]).toBeDefined();
-		expect(state[0]).toEqual([3,2,1,3,2,1]);
+		expect(state[0]).toEqual(maybeResult);
 	});
 
 	it('can carry subscriber scope over its hof chain', function() {
@@ -304,7 +464,8 @@ describe('subscriber', function() {
 
 		tick(ASYNC_WAIT);
 
-		expect(them.length > 1).toBe(true);
+		// -1 because we cant persist scope in squash method
+		expect(them).toBeTruthy();
 
 		them.forEach(function(that) {
 			expect(that.oId).toBeDefined();
@@ -328,7 +489,7 @@ describe('subscriber', function() {
 
 		tick(ASYNC_WAIT);
 
-		expect(them.length > 1).toBe(true);
+		expect(them).toBeTruthy();
 
 		them.forEach(function(that) {
 			expect(that.state).toBeDefined();
@@ -349,27 +510,33 @@ describe('subscriber', function() {
 		expect(maybeChain).not.toBeDefined();
 	});
 
-	it('can run object messages over chained functions', function() {
-		var subscriber = genSubscriber(),
+	it('returns empty array in receive when no message survives transformation', function() {
 
-		johnDesc, janeDesc;
+		var subscriber1 = genSubscriber(),
+		subscriber2 = genSubscriber();
 
-		subscriber.map(function(msg1) {
-			return ''.concat(msg1.name, ': ', msg1.age, '.');
-		}).receive(function(msgs) {
-			johnDesc = msgs[0];
-			janeDesc = msgs[1];
+		subscriber1.filter(function(message) {
+			return !message;
+		}).receive(function(maybeMessages) {
+			state.push(maybeMessages);
 		});
 
-		bugle.pub(TEST_NAMESPACE, PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG2);
+		subscriber1.reject(function(message) {
+			return message;
+		}).receive(function(maybeMessages) {
+			state.push(maybeMessages);
+		});
+
+
+		bugle.pub(TEST_NAMESPACE, 
+			PUBLISH_OBJECT_MSG1, PUBLISH_OBJECT_MSG1, 
+			PUBLISH_ARRAY_MSG1, PUBLISH_ARRAY_MSG2
+		);
 
 		tick(ASYNC_WAIT);
 
-
-		expect(johnDesc).toBeDefined();
-		expect(johnDesc).toBe('John Doe: 18.');
-
-		expect(janeDesc).toBeDefined();
-		expect(janeDesc).toBe('Jane Doe: 21.');
+		expect(state[0].length).toBe(0);
+		expect(state[1].length).toBe(0);
 	});
+
 });
