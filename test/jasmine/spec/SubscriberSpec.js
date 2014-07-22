@@ -277,6 +277,41 @@ describe('subscriber', function() {
 
 	});
 
+	it('can reduce over empty array', function() {
+
+		var subscriberAcc = genSubscriber(),
+		subscriberNoAcc = genSubscriber(),
+
+		emptyArr = [],
+		maybeResult = [];
+
+		subscriberAcc.reduce(function(message, iter) {
+			return iter.concat(message);
+		}, [])
+		.receive(function(message) {
+			state[0] = message;
+		});
+
+		subscriberNoAcc.reduce(function(message, iter) {
+			return iter.concat(message);
+		})
+		.receive(function(message) {
+			state[1] = message;
+		});
+
+
+		bugle.pub(TEST_NAMESPACE, emptyArr);
+
+		tick(ASYNC_WAIT);
+
+		expect(state[0]).toBeDefined();
+		expect(state[0]).toEqual(maybeResult);
+
+		expect(state[1]).toBeDefined();
+		expect(state[1]).toEqual(maybeResult);
+
+	});
+
 	it('can reduce over object messages with accumulator value', function() {
 
 		var subscriber = genSubscriber(),

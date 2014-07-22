@@ -103,9 +103,7 @@
 		extendedBugle.input([5,4,3,2,1], [1,2]);
 
 		// publish to reference1
-		setTimeout(function() {
-			extendedBugle.unsub('cause', reference);
-		}, 1000);
+		extendedBugle.unsub('cause', reference);
 		
 		
 
